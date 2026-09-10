@@ -177,7 +177,7 @@ public:
     // (control-bar caption); the backend resolves event_id → archive_path + window.
     void request_archive_replay(const std::string& event_id, const std::string& symbol = "", float speed = 1.0f);
 
-    // Pack replay (Hot Replay Path B): play a self-contained .edpack served
+    // Pack replay (Hot Replay Path B): play a self-contained .tospack served
     // static from R2/CDN - no session POST, no WebSocket, no token (public
     // showcase packs). The PackReplayEngine reproduces the box's session
     // behavior client-side and drives this manager through the same

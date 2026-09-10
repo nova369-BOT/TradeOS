@@ -9,7 +9,7 @@
 #endif
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// theme.cpp - edgedepth design system implementation
+// theme.cpp - tradeos design system implementation
 // Style mapping per the design system's ImGui notes §1, tokens per tokens.json.
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -27,7 +27,7 @@ namespace Theme {
         ImFont* f_mono_lg     = nullptr;
 
         // tweak state
-        Accent           g_accent  = Accent::Teal;
+        Accent           g_accent  = Accent::Gold;
         CandleConvention g_candles = CandleConvention::TealMag;
         int              g_density = 8;
 
@@ -48,11 +48,12 @@ namespace Theme {
         g_accent = a;
         uint32_t hex, tx; float soft, line;
         switch (a) {
+            case Accent::Gold:   // TradeOS default: gold #C9A227, textTint #E0BD4C
+            default:             hex = 0xC9A227; tx = 0xE0BD4C; soft = 0.14f; line = 0.55f; break;
             case Accent::Indigo: hex = 0x6d8bff; tx = 0x8ba3ff; soft = 0.15f; line = 0.55f; break;
             case Accent::Amber:  hex = 0xf0b350; tx = 0xf6c76e; soft = 0.15f; line = 0.55f; break;
             case Accent::Mono:   hex = 0xaab8c4; tx = 0xc0ccd6; soft = 0.13f; line = 0.45f; break;
-            case Accent::Teal:   // design default: accent #35c9c4, textTint #3fe0d0
-            default:             hex = 0x35c9c4; tx = 0x3fe0d0; soft = 0.14f; line = 0.55f; break;
+            case Accent::Teal:   hex = 0x35c9c4; tx = 0x3fe0d0; soft = 0.14f; line = 0.55f; break;
         }
         Tokens::BRAND      = from_hex(hex);
         Tokens::BRAND_SOFT = from_hex(hex, soft);
@@ -185,7 +186,7 @@ namespace Theme {
         c[ImGuiCol_DockingPreview]    = with_a(BRAND, 0.35f);
         c[ImGuiCol_DockingEmptyBg]    = BASE;
         c[ImGuiCol_NavHighlight]      = BRAND_LINE;
-        c[ImGuiCol_ModalWindowDimBg]  = from_hex(0x030508, 0.62f);
+        c[ImGuiCol_ModalWindowDimBg]  = from_hex(0x05070A, 0.62f);
 
         // ── metrics (IMGUI-NOTES §1) ─────────────────────────────────────────
         s.WindowRounding    = 0.0f;   // docked panels are square (chrome rules)

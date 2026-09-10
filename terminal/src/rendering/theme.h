@@ -1,9 +1,9 @@
 #pragma once
 // ═══════════════════════════════════════════════════════════════════════════════
-// theme.h - edgedepth design system: tokens + ImGui/ImPlot style + fonts
+// theme.h - tradeos design system: tokens + ImGui/ImPlot style + fonts
 //
-// Source of truth: the edgedepth design system - tokens.json (v0.1.0) and
-// edgedepth.css (:root block). Dark-only.
+// Source of truth: the tradeos design system - tokens.json (v0.1.0) and
+// tradeos.css (:root block). Dark-only.
 // Near-black cool charcoal surfaces, teal-up / magenta-rose-down market data,
 // cyan brand accent (used sparingly), amber for replay/events/POC.
 //
@@ -36,32 +36,31 @@ namespace Theme {
     }
 
     // ── Runtime tweak enums (wired to the Tweaks panel in a later phase) ─────
-    enum class Accent : uint8_t { Teal, Indigo, Amber, Mono };
+    enum class Accent : uint8_t { Gold, Indigo, Amber, Mono, Teal };
     enum class CandleConvention : uint8_t { TealMag, Classic, Muted };
 
     namespace Tokens {
-        // ── Surfaces - theme-tokens.json bg ramp (2026-07-02 redesign) ───────
+        // ── Surfaces - TradeOS dark palette ───────────────────────────────────
         // bg-0 app background / chart canvas · bg-1 bars + panel chrome ·
-        // bg-2 raised (hover rows, chips, active tab). Idle controls sit at
-        // bg-1 (flat until interacted); hover/pressed raise to bg-2.
-        inline constexpr ImVec4 BASE   = from_hex(0x0b0e13);  // bg-0
-        inline constexpr ImVec4 PANEL  = from_hex(0x10141b);  // bg-1
-        inline constexpr ImVec4 ELEV   = from_hex(0x161b24);  // bg-2
-        inline constexpr ImVec4 INPUT  = from_hex(0x10141b);  // bg-1 - idle controls
-        inline constexpr ImVec4 HOVER  = from_hex(0x161b24);  // bg-2
-        inline constexpr ImVec4 ACTIVE = from_hex(0x161b24);  // bg-2 (accent marks "on")
+        // bg-2 raised (hover rows, chips, active tab).
+        inline constexpr ImVec4 BASE   = from_hex(0x0E1116);  // bg-0
+        inline constexpr ImVec4 PANEL  = from_hex(0x14181D);  // bg-1
+        inline constexpr ImVec4 ELEV   = from_hex(0x1B2028);  // bg-2
+        inline constexpr ImVec4 INPUT  = from_hex(0x14181D);  // bg-1 - idle controls
+        inline constexpr ImVec4 HOVER  = from_hex(0x1B2028);  // bg-2
+        inline constexpr ImVec4 ACTIVE = from_hex(0x1B2028);  // bg-2 (accent marks "on")
 
-        // ── Hairlines - line-1 borders/dividers, line-2 control borders ──────
-        inline constexpr ImVec4 BD1  = from_hex(0x1e242e);          // line-1 - the only separation
-        inline constexpr ImVec4 BD2  = from_hex(0x2a3140);          // line-2 - control borders
-        inline constexpr ImVec4 BD3  = from_hex(0x566070, 0.55f);   // hover borders (text-3 hue)
-        inline constexpr ImVec4 GRID = from_hex(0x1e242e, 0.55f);   // chart gridlines (line-1)
+        // ── Hairlines - subtle dividers ──────────────────────────────────────
+        inline constexpr ImVec4 BD1  = from_hex(0x222832);          // line-1
+        inline constexpr ImVec4 BD2  = from_hex(0x2E3644);          // line-2 - control borders
+        inline constexpr ImVec4 BD3  = from_hex(0x566070, 0.55f);   // hover borders
+        inline constexpr ImVec4 GRID = from_hex(0x222832, 0.55f);   // chart gridlines
 
-        // ── Text ramp - text-1/2/3 (+ dimmed text-3 for axis/disabled) ───────
-        inline constexpr ImVec4 TX1 = from_hex(0xdfe6ee);  // primary numerals, titles
-        inline constexpr ImVec4 TX2 = from_hex(0x8b95a5);  // labels, secondary data
-        inline constexpr ImVec4 TX3 = from_hex(0x566070);  // captions, units, group labels
-        inline constexpr ImVec4 TX4 = from_hex(0x566070, 0.72f);  // axis ticks, disabled
+        // ── Text ramp - off-white primary, muted greys ──────────────────────
+        inline constexpr ImVec4 TX1 = from_hex(0xF2EFE6);  // primary numerals, titles
+        inline constexpr ImVec4 TX2 = from_hex(0x9AA3B2);  // labels, secondary data
+        inline constexpr ImVec4 TX3 = from_hex(0x626B79);  // captions, units, group labels
+        inline constexpr ImVec4 TX4 = from_hex(0x626B79, 0.72f);  // axis ticks, disabled
 
         // ── Semantic - runtime-mutable (candle convention / accent tweaks) ──
         inline ImVec4 UP         = from_hex(0x2fd6ad);         // up / bid / positive
@@ -70,17 +69,15 @@ namespace Theme {
         inline ImVec4 DOWN_SOFT  = from_hex(0xee5c78, 0.13f);
         inline ImVec4 UP_LINE    = from_hex(0x2fd6ad, 0.50f);
         inline ImVec4 DOWN_LINE  = from_hex(0xee5c78, 0.50f);
-        inline ImVec4 BRAND      = from_hex(0x35c9c4);         // accent - the only on-state hue
-        inline ImVec4 BRAND_SOFT = from_hex(0x35c9c4, 0.14f);
-        inline ImVec4 BRAND_LINE = from_hex(0x35c9c4, 0.55f);
-        inline ImVec4 BRAND_TX   = from_hex(0x3fe0d0);         // accent textTint (on-state text)
+        inline ImVec4 BRAND      = from_hex(0xC9A227);         // gold - primary accent
+        inline ImVec4 BRAND_SOFT = from_hex(0xC9A227, 0.14f);
+        inline ImVec4 BRAND_LINE = from_hex(0xC9A227, 0.55f);
+        inline ImVec4 BRAND_TX   = from_hex(0xE0BD4C);         // accent textTint
         inline constexpr ImVec4 WARN = from_hex(0xf0b350);     // funding, big prints, alerts
-        inline constexpr ImVec4 WARN_SOFT = from_hex(0xf0b350, 0.12f);  // replay banner, high-regime chip fill
+        inline constexpr ImVec4 WARN_SOFT = from_hex(0xf0b350, 0.12f);
         // dark ink for text on solid BRAND fills (play orb, price chip, pills)
-        inline constexpr ImVec4 BRAND_INK = from_hex(0x04181d);
-        // resting-book blue (DOM v2): pending limit-order depth, side-agnostic. The
-        // one neutral data hue - teal/rose stays reserved for EXECUTED flow. (Confirm
-        // this hue or remap to a brand blue before shipping - dom.SPEC.md §8.)
+        inline constexpr ImVec4 BRAND_INK = from_hex(0x14181D);
+        // resting-book blue (DOM v2): pending limit-order depth, side-agnostic.
         inline constexpr ImVec4 REST      = from_hex(0x4d8cd6);
         inline constexpr ImVec4 REST_SOFT = from_hex(0x4d8cd6, 0.30f);
 

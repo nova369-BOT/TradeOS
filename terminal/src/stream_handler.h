@@ -43,7 +43,7 @@ public:
     bool is_replay_mode() const { return replay_mode_; }
     void set_replay_mode(bool v) { replay_mode_ = v; }
 
-    // Pack replay (Hot Replay Path B): while a .edpack session is active, the
+    // Pack replay (Hot Replay Path B): while a .tospack session is active, the
     // PackReplayEngine installs this hook and REPLAY-mode StreamManagers offer
     // it every outgoing JSON request (get_historical_candles etc.) BEFORE the
     // WebSocket. Returning true consumes the request - the engine serves it

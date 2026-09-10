@@ -14,7 +14,7 @@
 //
 // Style: colors ONLY via Theme::Tokens; numerals in JetBrains Mono (Fonts::mono*),
 // chrome/labels in Hanken (Fonts::ui/label). Design bundle:
-// watchlist_stats_DOM_redesign/edgedepth-stats-panel-v2/stats-panel.SPEC.md
+// watchlist_stats_DOM_redesign/tradeos-stats-panel-v2/stats-panel.SPEC.md
 // ═══════════════════════════════════════════════════════════════════════════════
 #include "ui/widget.h"
 #include "types/types.h"

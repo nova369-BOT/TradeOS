@@ -386,7 +386,7 @@ void emit_capture(int mode, int64_t t0, int64_t t1, double p_top, double p_bot) 
     EM_ASM({
         try {
             var obj = JSON.parse(UTF8ToString($0));
-            window.dispatchEvent(new CustomEvent('edgedepth:capture', { detail: obj }));
+            window.dispatchEvent(new CustomEvent('tradeos:capture', { detail: obj }));
         } catch (e) {
             console.warn('studio capture emit failed', e);
         }
@@ -399,7 +399,7 @@ void emit_capture(int mode, int64_t t0, int64_t t1, double p_top, double p_bot) 
 void emit_capture_cancel() {
 #ifdef __EMSCRIPTEN__
     EM_ASM({
-        window.dispatchEvent(new CustomEvent('edgedepth:capture', { detail: { cancelled: true } }));
+        window.dispatchEvent(new CustomEvent('tradeos:capture', { detail: { cancelled: true } }));
     });
 #endif
 }
@@ -605,7 +605,7 @@ void StudioRuntime::emit_state(const AppContext& ctx) {
     st["exportAudio"] = ClipRecorder::export_has_audio();
     st["cardUp"]      = card_up;
 
-    transport::dispatch_state("edgedepth:studio", "__EDGEDEPTH_STUDIO_STATE__", st.dump());
+    transport::dispatch_state("tradeos:studio", "__TRADEOS_STUDIO_STATE__", st.dump());
 #else
     (void)ctx;
 #endif
@@ -619,7 +619,7 @@ void StudioRuntime::emit_state(const AppContext& ctx) {
 // as __studio_cmd_set_source (double underscore) in CMake EXPORTED_FUNCTIONS.
 //
 // The source crosses as a JSON STRING via a window GLOBAL (window.__STUDIO_SOURCE__),
-// NOT as a char* arg - exactly how EducationBoot::detect() reads __EDGEDEPTH_LESSON__.
+// NOT as a char* arg - exactly how EducationBoot::detect() reads __TRADEOS_LESSON__.
 // This avoids needing malloc/free/stringToUTF8 exported to EXTERNAL JS (they're only
 // in EXPORTED_RUNTIME_METHODS-as-needed); inside an EM_ASM block they're always
 // available. JS sets the global, then calls this no-arg export to consume it.
@@ -677,7 +677,7 @@ EMSCRIPTEN_KEEPALIVE void _studio_cmd_skip(int seconds) {
 // The lesson doc + filename slug cross via window globals (same seam as
 // __STUDIO_SOURCE__): React sets __STUDIO_EXPORT_LESSON__ (LessonDoc JSON) and
 // __STUDIO_EXPORT_SLUG__, then calls this no-arg export. The A/V MediaStream
-// rides window.__EDGEDEPTH_EXPORT_MEDIA__ and is consumed by the recorder glue
+// rides window.__TRADEOS_EXPORT_MEDIA__ and is consumed by the recorder glue
 // at capture start - nothing marshals across the wasm boundary here.
 EMSCRIPTEN_KEEPALIVE void _studio_cmd_export_start(void) {
     char* doc = reinterpret_cast<char*>(EM_ASM_PTR({
@@ -721,7 +721,7 @@ EMSCRIPTEN_KEEPALIVE void _studio_cmd_export_stop(void) {
 }
 
 // Arm ONE draw/capture gesture on the chart. mode: 0 = disarm, 1 = region box,
-// 2 = price band. The result comes back as CustomEvent('edgedepth:capture')
+// 2 = price band. The result comes back as CustomEvent('tradeos:capture')
 // carrying {mode, t0, t1, pTop, pBot} (or {cancelled:true} on Esc/disarm).
 EMSCRIPTEN_KEEPALIVE void _studio_cmd_arm_capture(int mode) {
     edu::StudioRuntime::instance().cmd_arm_capture(mode);

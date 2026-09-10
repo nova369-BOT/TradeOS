@@ -1,4 +1,4 @@
-# TradeOS stack — Edgedepth Terminal + community gateway.
+# TradeOS stack — TradeOS Terminal (vendored fork of the upstream terminal) + community gateway.
 #
 #   docker compose up
 #   open http://localhost:8080
@@ -34,7 +34,7 @@ services:
     environment:
       # Resolved by YOUR BROWSER (not this container), so must be a host-visible
       # address — Docker-internal "gateway" DNS won't work from the browser.
-      EDGEDEPTH_WS_URL: "ws://localhost:9001/ws"
+      TRADEOS_WS_URL: "ws://localhost:9001/ws"
     depends_on:
       - gateway
     restart: unless-stopped

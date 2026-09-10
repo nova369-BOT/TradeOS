@@ -15,7 +15,7 @@ function archiveWorker() {
     let dbPromise;
     function database() {
         if (!dbPromise) dbPromise = new Promise((resolve, reject) => {
-            const r = indexedDB.open('edgedepth-rt-observed-v1', 1);
+            const r = indexedDB.open('tradeos-rt-observed-v1', 1);
             r.onupgradeneeded = () => {
                 r.result.createObjectStore('data');
                 const m = r.result.createObjectStore('meta', {keyPath: 'key'});

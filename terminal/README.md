@@ -1,4 +1,4 @@
-# EdgeDepth Terminal
+# TradeOS Terminal
 
 **An open-source orderflow terminal and local market-data replay/testing workbench that runs in your browser.**
 
@@ -8,11 +8,11 @@ C++20 compiled to WebAssembly. Dear ImGui + ImPlot for immediate-mode rendering,
 
 *A real +856% short squeeze replayed from a static `.edpack` file in the built-in Replay Library: no feed, no account, no replay server. ([still screenshot](assets/screenshot.png))*
 
-This is the full source of the terminal that powers [EdgeDepth](https://edgedepth.com/open-source?utm_source=github&utm_medium=oss&utm_campaign=terminal): the same canvas, the same widgets, the same render loop. It is not a demo build or a stripped-down "community edition."
+This is the full source of the terminal that powers [TradeOS](https://tradeos.com/open-source?utm_source=github&utm_medium=oss&utm_campaign=terminal): the same canvas, the same widgets, the same render loop. It is not a demo build or a stripped-down "community edition."
 
 Run it against a local exchange feed, point it at your own wire-compatible data,
 or use deterministic `.edpack` recordings as repeatable fixtures. If you prefer
-a managed feed and stored history, open the [hosted live terminal](https://app.edgedepth.com/terminal?utm_source=github&utm_medium=oss&utm_campaign=terminal).
+a managed feed and stored history, open the [hosted live terminal](https://app.tradeos.com/terminal?utm_source=github&utm_medium=oss&utm_campaign=terminal).
 
 ## Product gallery
 
@@ -118,13 +118,13 @@ The current order book is never copied backward to fill those gaps.
 The terminal and a live market data feed, both on your machine:
 
 ```bash
-git clone https://github.com/edgedepthhq/edgedepth-terminal.git
-cd edgedepth-terminal
+git clone https://github.com/tradeoshq/tradeos-terminal.git
+cd tradeos-terminal
 docker compose up
 ```
 
 Then open **http://localhost:8080**. No API key, no account, no signup. The
-feed is [edgedepth-gateway](https://github.com/edgedepthhq/edgedepth-gateway),
+feed is [tradeos-gateway](https://github.com/tradeoshq/tradeos-gateway),
 a small MIT-licensed Go service that bridges Binance's public WebSocket
 streams into this terminal's wire format.
 
@@ -162,16 +162,16 @@ publishes the images `0.3.0` and `0.3`, so `:v0.3.0` fails with
 `manifest unknown` while `:0.3.0` is there.
 
 The two images version independently, so their numbers do not match. Check
-[the releases](https://github.com/edgedepthhq/edgedepth-terminal/releases) and
-[the gateway's](https://github.com/edgedepthhq/edgedepth-gateway/releases) for
+[the releases](https://github.com/tradeoshq/tradeos-terminal/releases) and
+[the gateway's](https://github.com/tradeoshq/tradeos-gateway/releases) for
 what is current, or ask the registry directly, which needs no login and no
 Docker:
 
 ```bash
-curl -s "https://ghcr.io/token?scope=repository:edgedepthhq/edgedepth-terminal:pull&service=ghcr.io" \
+curl -s "https://ghcr.io/token?scope=repository:tradeoshq/tradeos-terminal:pull&service=ghcr.io" \
   | sed -n 's/.*"token":"\([^"]*\)".*/\1/p' \
   | xargs -I{} curl -s -H "Authorization: Bearer {}" \
-      https://ghcr.io/v2/edgedepthhq/edgedepth-terminal/tags/list
+      https://ghcr.io/v2/tradeoshq/tradeos-terminal/tags/list
 ```
 
 `docker-compose.yml` ships pinned to `:latest` deliberately, so the quick start
@@ -181,9 +181,9 @@ does not move under you:
 ```yaml
 services:
   gateway:
-    image: ghcr.io/edgedepthhq/edgedepth-gateway:0.1.0
+    image: ghcr.io/tradeoshq/tradeos-gateway:0.1.0
   terminal:
-    image: ghcr.io/edgedepthhq/edgedepth-terminal:0.3.0
+    image: ghcr.io/tradeoshq/tradeos-terminal:0.3.0
 ```
 
 A digest is the strongest pin, because a version tag can in principle be
@@ -191,8 +191,8 @@ repointed while a digest cannot:
 
 ```bash
 docker compose pull
-docker inspect --format='{{index .RepoDigests 0}}' ghcr.io/edgedepthhq/edgedepth-terminal:latest
-docker inspect --format='{{index .RepoDigests 0}}' ghcr.io/edgedepthhq/edgedepth-gateway:latest
+docker inspect --format='{{index .RepoDigests 0}}' ghcr.io/tradeoshq/tradeos-terminal:latest
+docker inspect --format='{{index .RepoDigests 0}}' ghcr.io/tradeoshq/tradeos-gateway:latest
 ```
 
 Put the resulting `name@sha256:...` in `docker-compose.yml` and you have both a
@@ -242,8 +242,8 @@ coverage. TPO and Renko do not display these overlays.
 The terminal is a client. It speaks a documented protobuf-over-WebSocket wire format and connects to whatever feed you give it, resolved in this order:
 
 1. `?ws=ws://localhost:8080/ws` (query parameter)
-2. `window.__EDGEDEPTH_WS_URL__` (set by the host page before the WASM glue loads)
-3. `wss://api.edgedepth.com/ws` (EdgeDepth's hosted backend, the default)
+2. `window.__TRADEOS_WS_URL__` (set by the host page before the WASM glue loads)
+3. `wss://api.tradeos.com/ws` (TradeOS's hosted backend, the default)
 
 The schema in [`protos/messages.proto`](protos/messages.proto) is the contract.
 Trades drive the tape and observed forming footprints; supplied candles drive
@@ -277,9 +277,9 @@ The example requires explicit aggressor side, positive base-asset quantity and
 source timestamps. It rejects unknown sides, negative sizes and future dates.
 It advances sequentially through source time; use `.edpack` for seekable replay.
 
-**Community gateway:** [edgedepth-gateway](https://github.com/edgedepthhq/edgedepth-gateway) is exactly that feed, MIT licensed. It serves trades, candles, orderbook, stats and liquidations from Binance's free public streams, and answers historical candle requests from their REST klines so the chart boots with real history. It also builds **1s, 5s, 15s and 30s candles** trade by trade from the raw stream, updating the building candle as each trade arrives. The local gateway candidate also retains up to 60 minutes / 50,000 price-minute cells per active symbol for footprints and profiles. It starts at the next minute boundary after joining or detecting a gap, then closes the minute on a later trade. It has no historical trade backfill or disk persistence. See the [Quick start](#quick-start) to run both together.
+**Community gateway:** [tradeos-gateway](https://github.com/tradeoshq/tradeos-gateway) is exactly that feed, MIT licensed. It serves trades, candles, orderbook, stats and liquidations from Binance's free public streams, and answers historical candle requests from their REST klines so the chart boots with real history. It also builds **1s, 5s, 15s and 30s candles** trade by trade from the raw stream, updating the building candle as each trade arrives. The local gateway candidate also retains up to 60 minutes / 50,000 price-minute cells per active symbol for footprints and profiles. It starts at the next minute boundary after joining or detecting a gap, then closes the minute on a later trade. It has no historical trade backfill or disk persistence. See the [Quick start](#quick-start) to run both together.
 
-A few layers are driven by EdgeDepth's proprietary analytics streams: VPIN toxicity, positioning and smart-money flow, modelled liquidation estimates, pattern detection, and the scanner's composite scores. With a raw-data feed those panels simply stay empty and the terminal degrades gracefully; [which panels, and why](https://edgedepth.com/open-source?utm_source=github&utm_medium=oss&utm_campaign=terminal#empty-panels) lists them side by side. The [hosted product](https://app.edgedepth.com/terminal?utm_source=github&utm_medium=oss&utm_campaign=terminal) provides them, along with historical replay and structured courses taught inside the terminal.
+A few layers are driven by TradeOS's proprietary analytics streams: VPIN toxicity, positioning and smart-money flow, modelled liquidation estimates, pattern detection, and the scanner's composite scores. With a raw-data feed those panels simply stay empty and the terminal degrades gracefully; [which panels, and why](https://tradeos.com/open-source?utm_source=github&utm_medium=oss&utm_campaign=terminal#empty-panels) lists them side by side. The [hosted product](https://app.tradeos.com/terminal?utm_source=github&utm_medium=oss&utm_campaign=terminal) provides them, along with historical replay and structured courses taught inside the terminal.
 
 Run the terminal yourself with a live feed or a recording you already have.
 The hosted product adds maintained feeds, stored market history and a connected
@@ -288,7 +288,7 @@ inspect the available replay evidence, and save a search to revisit.
 
 Research also provides REST API and MCP access. Searchable research history and
 tick replay have different coverage and access limits; see the current
-[plans](https://edgedepth.com/pricing?utm_source=github&utm_medium=oss&utm_campaign=terminal)
+[plans](https://tradeos.com/pricing?utm_source=github&utm_medium=oss&utm_campaign=terminal)
 when you need hosted history or research capacity. Local replay remains part of
 the open-source terminal and requires no hosted subscription.
 
@@ -308,7 +308,7 @@ client-side, with nothing but static file hosting behind it. Orderbook, tape,
 liquidations, footprint and volume profile work where the pack actually includes
 those streams; a pack is not a promise of every layer.
 
-`.edpack` is EdgeDepth's own deterministic replay container. The format is
+`.edpack` is TradeOS's own deterministic replay container. The format is
 documented in [`docs/EDPACK.md`](docs/EDPACK.md): magic and version gating,
 the protobuf header, the block index, framing, compression, what determinism
 does and does not guarantee, and how a truncated pack fails.
@@ -338,7 +338,7 @@ manifest without rebuilding:
 ?replayLibrary=http%3A%2F%2Flocalhost%3A9000%2Fmanifest.json
 ```
 
-Or set `window.__EDGEDEPTH_REPLAY_LIBRARY_URL__` before the WebAssembly glue
+Or set `window.__TRADEOS_REPLAY_LIBRARY_URL__` before the WebAssembly glue
 loads. See [`replay-library/README.md`](replay-library/README.md) for the
 manifest and CORS contract. The self-hosted client contains no phone-home
 analytics; public pack engagement can be measured from aggregate object
@@ -365,8 +365,8 @@ submodules or additional system libraries.
 On Windows or macOS, install Docker Desktop and use Linux containers. Then:
 
 ```text
-git clone https://github.com/edgedepthhq/edgedepth-terminal.git
-cd edgedepth-terminal
+git clone https://github.com/tradeoshq/tradeos-terminal.git
+cd tradeos-terminal
 docker compose up
 ```
 
@@ -399,8 +399,8 @@ cd "$HOME/emsdk"
 source ./emsdk_env.sh
 
 cd "$HOME"
-git clone https://github.com/edgedepthhq/edgedepth-terminal.git
-cd edgedepth-terminal
+git clone https://github.com/tradeoshq/tradeos-terminal.git
+cd tradeos-terminal
 
 emcmake cmake -S . -B build-wsl -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build-wsl --target c_based_trader_client --parallel
@@ -431,7 +431,7 @@ The WASM build itself uses Emscripten's Clang.
 From that PowerShell window, install the pinned tools for the current user:
 
 ```powershell
-$ToolsRoot = Join-Path $env:LOCALAPPDATA "EdgeDepth\tools"
+$ToolsRoot = Join-Path $env:LOCALAPPDATA "TradeOS\tools"
 $EmsdkRoot = Join-Path $ToolsRoot "emsdk"
 $ProtocRoot = Join-Path $ToolsRoot "protoc-21.12"
 $ProtocZip = Join-Path $ToolsRoot "protoc-21.12-win64.zip"
@@ -457,8 +457,8 @@ The version checks must show Emscripten 4.0.15 and `libprotoc 3.21.12`.
 Clone and build the terminal in the same Developer PowerShell session:
 
 ```powershell
-git clone https://github.com/edgedepthhq/edgedepth-terminal.git
-Set-Location edgedepth-terminal
+git clone https://github.com/tradeoshq/tradeos-terminal.git
+Set-Location tradeos-terminal
 
 emcmake.bat cmake -S . -B build-windows -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build-windows --target c_based_trader_client --parallel
@@ -514,8 +514,8 @@ Please keep PRs focused. The render loop has strict conventions: no allocation i
 
 ## Related projects
 
-- [edgedepth-gateway](https://github.com/edgedepthhq/edgedepth-gateway) (MIT): the self-host feed this terminal connects to, bridging Binance's public streams into the wire format, with a pluggable exchange layer for adding venues.
-- [edgedepth-research-mcp](https://github.com/edgedepthhq/edgedepth-research-mcp) (MIT): a Model Context Protocol server that lets Claude, Cursor, or any MCP client search EdgeDepth's recorded microstructure: every verified occurrence of a market condition, with forward outcomes and replay-linked evidence that opens in this terminal.
+- [tradeos-gateway](https://github.com/tradeoshq/tradeos-gateway) (MIT): the self-host feed this terminal connects to, bridging Binance's public streams into the wire format, with a pluggable exchange layer for adding venues.
+- [tradeos-research-mcp](https://github.com/tradeoshq/tradeos-research-mcp) (MIT): a Model Context Protocol server that lets Claude, Cursor, or any MCP client search TradeOS's recorded microstructure: every verified occurrence of a market condition, with forward outcomes and replay-linked evidence that opens in this terminal.
 
 ## License
 
@@ -523,4 +523,4 @@ Please keep PRs focused. The render loop has strict conventions: no allocation i
 
 ---
 
-Built by [EdgeDepth](https://edgedepth.com/open-source?utm_source=github&utm_medium=oss&utm_campaign=terminal): real-time crypto microstructure, liquidation heatmaps, orderflow analytics, and courses taught inside the live terminal.
+Built by [TradeOS](https://tradeos.com/open-source?utm_source=github&utm_medium=oss&utm_campaign=terminal): real-time crypto microstructure, liquidation heatmaps, orderflow analytics, and courses taught inside the live terminal.

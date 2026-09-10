@@ -1,4 +1,4 @@
-# edgedepth - ImGui / ImPlot mapping notes
+# tradeos - ImGui / ImPlot mapping notes
 
 Practical notes for porting the HTML reference into C++ / ImGui (docking) / ImPlot.
 Values come from `tokens.json`. ImGui colors are `ImVec4` (0-1 floats, RGBA).

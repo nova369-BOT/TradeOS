@@ -100,12 +100,12 @@ void SymbolRegistry::fetch_metadata(std::function<void()> on_ready) {
     // 1. Try localStorage cache (synchronous)
     bool cache_hit = EM_ASM_INT({
         try {
-            var tsStr = localStorage.getItem('edgedepth_symbol_metadata_ts');
+            var tsStr = localStorage.getItem('tradeos_symbol_metadata_ts');
             if (!tsStr) return 0;
             var age = Date.now() - parseInt(tsStr, 10);
             if (age > $0) return 0;
 
-            var data = localStorage.getItem('edgedepth_symbol_metadata');
+            var data = localStorage.getItem('tradeos_symbol_metadata');
             if (!data) return 0;
 
             var len = lengthBytesUTF8(data);
@@ -132,8 +132,8 @@ void SymbolRegistry::fetch_metadata(std::function<void()> on_ready) {
             if (xhr.status === 200) {
                 var text = xhr.responseText;
                 try {
-                    localStorage.setItem('edgedepth_symbol_metadata', text);
-                    localStorage.setItem('edgedepth_symbol_metadata_ts', Date.now().toString());
+                    localStorage.setItem('tradeos_symbol_metadata', text);
+                    localStorage.setItem('tradeos_symbol_metadata_ts', Date.now().toString());
                 } catch(e) {
                     console.warn('SymbolRegistry cache write failed:', e);
                 }

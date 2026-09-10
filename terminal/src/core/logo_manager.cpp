@@ -26,7 +26,7 @@ namespace {
 
 // Coin/exchange PNG root = the URL prefix BEFORE "/coins/<stem>.png" (no trailing
 // slash, no /coins). For a dedicated R2 bucket served at a custom domain root,
-// this is just the domain. Overridable at boot via window.__EDGEDEPTH_LOGO_BASE__
+// this is just the domain. Overridable at boot via window.__TRADEOS_LOGO_BASE__
 // (TerminalEmbed injects the real R2 custom domain); compiled default below.
 // Layout: <base>/coins/<stem>.png, <base>/exchanges/<id>.png
 const char* kLogoBaseDefault = "https://logos.edgedepth.com";
@@ -34,9 +34,9 @@ const char* kLogoBaseDefault = "https://logos.edgedepth.com";
 std::string g_logo_base;  // resolved once
 
 #ifdef __EMSCRIPTEN__
-// Read window.__EDGEDEPTH_LOGO_BASE__ (malloc'd C string) or "".
+// Read window.__TRADEOS_LOGO_BASE__ (malloc'd C string) or "".
 EM_JS(char*, logo_js_base, (), {
-    var b = (typeof window !== 'undefined' && window.__EDGEDEPTH_LOGO_BASE__) || '';
+    var b = (typeof window !== 'undefined' && window.__TRADEOS_LOGO_BASE__) || '';
     var n = lengthBytesUTF8(b) + 1;
     var p = _malloc(n);
     stringToUTF8(b, p, n);
@@ -95,12 +95,12 @@ std::string exchange_stem(const std::string& id) {
 
 }  // namespace
 
-// ─── EM_JS decode bridge (state in Module['__edlogo']) ────────────────────────
+// ─── EM_JS decode bridge (state in Module['__toslogo']) ────────────────────────
 #ifdef __EMSCRIPTEN__
 
 EM_JS(void, logo_js_load, (const char* url_ptr), {
     var url = UTF8ToString(url_ptr);
-    var m = Module['__edlogo'] || (Module['__edlogo'] = { imgs: {} });
+    var m = Module['__toslogo'] || (Module['__toslogo'] = { imgs: {} });
     if (m.imgs[url]) return;                        // already loading/loaded
     var img = new Image();
     img.crossOrigin = 'anonymous';                  // R2 must send ACAO → untainted
@@ -115,7 +115,7 @@ EM_JS(void, logo_js_load, (const char* url_ptr), {
 });
 
 EM_JS(int, logo_js_state, (const char* url_ptr), {
-    var m = Module['__edlogo']; if (!m) return 0;
+    var m = Module['__toslogo']; if (!m) return 0;
     var rec = m.imgs[UTF8ToString(url_ptr)];
     return rec ? rec.state : 0;                      // 0 loading / 1 ready / 2 failed
 });
@@ -125,7 +125,7 @@ EM_JS(int, logo_js_state, (const char* url_ptr), {
 // re-binds). Returns 1 on success.
 EM_JS(int, logo_js_upload, (const char* url_ptr, int tex), {
     try {
-        var m = Module['__edlogo']; if (!m) return 0;
+        var m = Module['__toslogo']; if (!m) return 0;
         var rec = m.imgs[UTF8ToString(url_ptr)];
         if (!rec || rec.state !== 1) return 0;
         var glTex = GL.textures[tex];
@@ -140,7 +140,7 @@ EM_JS(int, logo_js_upload, (const char* url_ptr, int tex), {
 
 // Drop the decoded <img> so the browser can free it (called on LRU eviction).
 EM_JS(void, logo_js_release, (const char* url_ptr), {
-    var m = Module['__edlogo']; if (!m) return;
+    var m = Module['__toslogo']; if (!m) return;
     delete m.imgs[UTF8ToString(url_ptr)];
 });
 

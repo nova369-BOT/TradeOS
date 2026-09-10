@@ -4,9 +4,9 @@
 //
 // The web host (Next/Payload) knows the signed-in user's tier; it hands it to the
 // WASM client via a window global set BEFORE the glue loads (mirrors how lessons
-// are passed in via __EDGEDEPTH_LESSON__):
+// are passed in via __TRADEOS_LESSON__):
 //
-//     window.__EDGEDEPTH_TIER__ = "free" | "trader" | "pro" | "research" | "admin";
+//     window.__TRADEOS_TIER__ = "free" | "trader" | "pro" | "research" | "admin";
 //
 // We read it once at boot. This drives only the UX (locked menu items, the
 // scrubber's advertised archive depth, the upgrade nudge). It is NOT a security
@@ -45,7 +45,7 @@ enum class Tier : uint8_t { Free, Trader, Pro, Research, Admin };
 // archived UTC CALENDAR DAY (e.g. [9 Jul 00:00, 10 Jul 00:00) UTC), which only
 // advances when a new day's parquet archive lands on the box. The backend is the
 // single source of truth: /replay/availability injects the exact bounds via
-// window.__EDGEDEPTH_FREE_WINDOW__ (read in detect()), and free_window_range()
+// window.__TRADEOS_FREE_WINDOW__ (read in detect()), and free_window_range()
 // prefers them. When the fetch fails, the client computes the SAME day itself
 // (today-2, mirroring freeFloorDays/coldFloorDays) - see free_window_range.
 //
@@ -63,7 +63,7 @@ inline constexpr int64_t PRO_REPLAY_LOOKBACK_MS   = 90LL * 24LL * 3600LL * 1000L
 // Pro offer even after Pro moved to 90 days. Keep the default aligned with Pro;
 // deeper signed claims still override it for Research and staff.
 //
-// The host injects window.__EDGEDEPTH_REPLAY_LOOKBACK_DAYS__ from the SAME number
+// The host injects window.__TRADEOS_REPLAY_LOOKBACK_DAYS__ from the SAME number
 // it mints into the token, so the client affordance and server enforcement cannot
 // disagree - exactly how the free window is already resolved. Absent or invalid
 // leaves 90d, so an ordinary Pro user sees their real reach and never fires a
@@ -103,9 +103,9 @@ inline bool  is_research() {
 inline bool  is_admin() { return current() == Tier::Admin; }
 
 // Whether this build is running behind the hosted product, i.e. whether there
-// is an EdgeDepth account and a courses hub on the other side of the chrome.
+// is an TradeOS account and a courses hub on the other side of the chrome.
 //
-// Defaults TRUE and only ever flips on an EXPLICIT window.__EDGEDEPTH_HOSTED__
+// Defaults TRUE and only ever flips on an EXPLICIT window.__TRADEOS_HOSTED__
 // === false. app.edgedepth.com never sets that global, so the hosted deploy is
 // byte-identical to before this existed; the bundled docker image sets it in
 // docker/entrypoint.sh. Read via detect() at boot.
@@ -117,16 +117,16 @@ inline bool  is_admin() { return current() == Tier::Admin; }
 inline bool& hosted() { static bool b = true; return b; }
 
 // Signed-in user's email (account menu header). Set by the host via
-// window.__EDGEDEPTH_USER_EMAIL__; empty in standalone/dev.
+// window.__TRADEOS_USER_EMAIL__; empty in standalone/dev.
 inline std::string& user_email() { static std::string e; return e; }
 
 // Subscription renewal date label for the Pro account menu (e.g. "12 Jul 2026").
-// The host sets window.__EDGEDEPTH_RENEWS__ to a short pre-formatted string; empty
+// The host sets window.__TRADEOS_RENEWS__ to a short pre-formatted string; empty
 // in standalone/dev (the menu then just shows "Active", no date). Display-only.
 inline std::string& renews_label() { static std::string s; return s; }
 
 // ── Dynamic free-replay window (backend-authoritative) ───────────────────────
-// The host injects window.__EDGEDEPTH_FREE_WINDOW__ (from GET /replay/availability,
+// The host injects window.__TRADEOS_FREE_WINDOW__ (from GET /replay/availability,
 // which the Go backend also ENFORCES) BEFORE the glue loads. When present it is the
 // most recent fully-archived UTC calendar day as absolute epoch-ms bounds - the REAL
 // replayable day, not the client's static [72h,48h] guess. detect() caches it here;
@@ -151,13 +151,13 @@ inline const char* tier_label() {
                          default: return "FREE"; }
 }
 
-// Read window.__EDGEDEPTH_TIER__ once. Safe to call when not embedded (leaves Pro).
+// Read window.__TRADEOS_TIER__ once. Safe to call when not embedded (leaves Pro).
 inline void detect() {
 #ifdef __EMSCRIPTEN__
     char buf[16] = {0};
     const int n = EM_ASM_INT({
         try {
-            var t = (window.__EDGEDEPTH_TIER__ || "").toString().toLowerCase();
+            var t = (window.__TRADEOS_TIER__ || "").toString().toLowerCase();
             if (!t) return 0;
             var s = (t === "free") ? "free" : (t === "trader") ? "trader"
                   : (t === "research") ? "research" : (t === "admin") ? "admin" : "pro";
@@ -176,14 +176,14 @@ inline void detect() {
     // Strict === false, so an absent or malformed global leaves hosted() true
     // and nothing about app.edgedepth.com changes.
     hosted() = EM_ASM_INT({
-        try { return window.__EDGEDEPTH_HOSTED__ === false ? 0 : 1; }
+        try { return window.__TRADEOS_HOSTED__ === false ? 0 : 1; }
         catch (e) { return 1; }
     }) != 0;
 
     char ebuf[128] = {0};
     EM_ASM({
         try {
-            var e = (window.__EDGEDEPTH_USER_EMAIL__ || "").toString();
+            var e = (window.__TRADEOS_USER_EMAIL__ || "").toString();
             stringToUTF8(e.slice(0, 120), $0, 128);
         } catch (err) {}
     }, ebuf);
@@ -193,13 +193,13 @@ inline void detect() {
     char rbuf[64] = {0};
     EM_ASM({
         try {
-            var r = (window.__EDGEDEPTH_RENEWS__ || "").toString();
+            var r = (window.__TRADEOS_RENEWS__ || "").toString();
             stringToUTF8(r.slice(0, 56), $0, 64);
         } catch (err) {}
     }, rbuf);
     renews_label() = rbuf;
 
-    // Backend-authoritative replay reach (window.__EDGEDEPTH_REPLAY_LOOKBACK_DAYS__),
+    // Backend-authoritative replay reach (window.__TRADEOS_REPLAY_LOOKBACK_DAYS__),
     // set by the host from the SAME number it mints into the replay token.
     // Clamped to [1, kMaxLookbackDaysSanity]; anything absent or absurd leaves
     // the 90d Pro default rather than advertising reach the backend will refuse.
@@ -216,7 +216,7 @@ inline void detect() {
     {
         const int d = EM_ASM_INT({
             try {
-                var v = parseInt(window.__EDGEDEPTH_REPLAY_LOOKBACK_DAYS__, 10);
+                var v = parseInt(window.__TRADEOS_REPLAY_LOOKBACK_DAYS__, 10);
                 return (isFinite(v) && v > 0) ? v : 0;
             } catch (e) { return 0; }
         });
@@ -226,7 +226,7 @@ inline void detect() {
         }
     }
 
-    // Dynamic free-replay window (window.__EDGEDEPTH_FREE_WINDOW__). Absolute
+    // Dynamic free-replay window (window.__TRADEOS_FREE_WINDOW__). Absolute
     // epoch-ms bounds cross as doubles via HEAPF64 (exact for ms timestamps up to
     // 2^53) to dodge the fragile i64 EM_ASM marshal; the day string comes back in
     // dbuf. ok=1 only when the global is present AND start<end.
@@ -235,7 +235,7 @@ inline void detect() {
         char dbuf[24] = {0};
         const int ok = EM_ASM_INT({
             try {
-                var w = window.__EDGEDEPTH_FREE_WINDOW__;
+                var w = window.__TRADEOS_FREE_WINDOW__;
                 if (!w) return 0;
                 var s = Number(w.startMs);
                 var e = Number(w.endMs);
@@ -407,7 +407,7 @@ inline std::string free_window_label() {
 
 // Short UTC day label for the resolved free window ("9 Jul") for the chart
 // right-click "Replay <day> instead" rescue offer. Reflects the backend archived
-// day when known (window.__EDGEDEPTH_FREE_WINDOW__), else the static fallback day.
+// day when known (window.__TRADEOS_FREE_WINDOW__), else the static fallback day.
 // Rebuilt each call (cheap; only hit while the locked context menu is open).
 inline std::string free_window_short_label() {
     int64_t s = 0, e = 0;
@@ -487,7 +487,7 @@ inline int sessions_today() {
     return EM_ASM_INT({
         try {
             var d = new Date().toISOString().slice(0, 10);
-            var raw = localStorage.getItem('edx_replay_day');
+            var raw = localStorage.getItem('tos_replay_day');
             var o = raw ? JSON.parse(raw) : null;
             if (!o || o.d !== d) return 0;
             return o.n | 0;
@@ -502,10 +502,10 @@ inline void note_session_started() {
     EM_ASM({
         try {
             var d = new Date().toISOString().slice(0, 10);
-            var raw = localStorage.getItem('edx_replay_day');
+            var raw = localStorage.getItem('tos_replay_day');
             var o = raw ? JSON.parse(raw) : null;
             var n = (o && o.d === d) ? (o.n | 0) : 0;
-            localStorage.setItem('edx_replay_day', JSON.stringify({ d: d, n: n + 1 }));
+            localStorage.setItem('tos_replay_day', JSON.stringify({ d: d, n: n + 1 }));
         } catch (e) {}
     });
 #endif

@@ -4,15 +4,15 @@
 //
 // A clip is a headless lesson. The render harness (Xvfb + Chromium + ffmpeg
 // x11grab) boots the terminal in an EXISTING replay mode - archived event
-// (window.__EDGEDEPTH_EVENT__) or CDN pack (window.__EDGEDEPTH_PACK__ with
-// embedded:true) - and ADDITIONALLY injects window.__EDGEDEPTH_RECORDER__ =
+// (window.__TRADEOS_EVENT__) or CDN pack (window.__TRADEOS_PACK__ with
+// embedded:true) - and ADDITIONALLY injects window.__TRADEOS_RECORDER__ =
 // <RecorderScript> before the glue loads. The recorder is NOT a fourth session
 // mode: it is an orthogonal DRIVER layered over whichever session booted. It
 //   (1) walks the script's shots[] against the shared ReplayManager
 //       (skip/seek + set_speed + timeframe + pause/hold),
-//   (2) EMITS its progress to the harness via CustomEvent('edgedepth:recorder')
-//       (+ window.__EDGEDEPTH_RECORDER_STATE__), transport_emit.h mechanics, and
-//   (3) burns the EDGEDEPTH watermark badge into the canvas (export-badge
+//   (2) EMITS its progress to the harness via CustomEvent('tradeos:recorder')
+//       (+ window.__TRADEOS_RECORDER_STATE__), transport_emit.h mechanics, and
+//   (3) burns the TRADEOS watermark badge into the canvas (export-badge
 //       style: line only, no REC dot - this is a produced video).
 //
 // Session boot, symbol routing, the focused widget set and chrome suppression
@@ -117,11 +117,11 @@ public:
     void update(const AppContext& ctx);
 
     // Per-frame, after update(). Pushes recorder state to the harness via
-    // CustomEvent('edgedepth:recorder') - transport_emit.h mechanics (discrete
+    // CustomEvent('tradeos:recorder') - transport_emit.h mechanics (discrete
     // dirty-check + clock cadence while a shot plays).
     void emit_state(const AppContext& ctx);
 
-    // Per-frame, late (foreground draw list). Burns the EDGEDEPTH badge from
+    // Per-frame, late (foreground draw list). Burns the TRADEOS badge from
     // the first shot onward (incl. the done freeze-frame). No REC dot.
     void render_overlay(const AppContext& ctx);
 

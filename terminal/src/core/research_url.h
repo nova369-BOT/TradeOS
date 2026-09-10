@@ -1,7 +1,7 @@
 #pragma once
 // ═══════════════════════════════════════════════════════════════════════════════
 // research_url.h - pure helpers for the terminal → /research handoff
-// (the EdgeDepth web app's /research surface).
+// (the TradeOS web app's /research surface).
 //
 // THE TRAP this module exists to pin: the chart context menu's captured
 // timestamp (context_menu_time_ms_) floors to the CHART TIMEFRAME so replay

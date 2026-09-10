@@ -8,7 +8,7 @@
 void ScannerManager::apply_update(const std::string& exchange, const pb::MarketScannerUpdate& update) {
     for (const auto& entry : update.entries()) {
         auto& s = entries_[make_key(exchange, entry.symbol())];
-        s.edgedepth_score = entry.edgedepth_score();
+        s.tradeos_score = entry.tradeos_score();
         s.vpin            = entry.vpin();
         s.hawkes_br       = entry.hawkes_br();
         s.cascade_risk    = entry.cascade_risk();

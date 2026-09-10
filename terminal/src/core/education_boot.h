@@ -3,10 +3,10 @@
 // education_boot.h - Education-layer startup seam (Guided Replay / Course Studio)
 //
 // The terminal binary is ONE canvas with three host chromes (bare Terminal,
-// Guided Replay, Course Studio). When the client is embedded in the EdgeDepth
+// Guided Replay, Course Studio). When the client is embedded in the TradeOS
 // web app for a lesson, the host page sets a config global BEFORE the glue loads:
 //
-//     window.__EDGEDEPTH_LESSON__ = { docUrl: "/api/lesson-doc/1", mode: "lesson" };
+//     window.__TRADEOS_LESSON__ = { docUrl: "/api/lesson-doc/1", mode: "lesson" };
 //
 // This module reads that global at startup and, if present, fetches the LessonDoc
 // from docUrl with credentials (so Payload's auth cookie rides along and the
@@ -17,7 +17,7 @@
 // + _malloc/stringToUTF8 -> extern "C" callback -> _free. No -sFETCH, no Asyncify.
 //
 // V1 SCOPE: read global, fetch doc, stash it, log it. The beat/track replay
-// runtime (see edgedepth-education/IMGUI-NOTES.md) consumes EducationBoot::lesson_json()
+// runtime (see tradeos-education/IMGUI-NOTES.md) consumes EducationBoot::lesson_json()
 // in a later session.
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -75,7 +75,7 @@ public:
     // the click. is_embedded() could not tell those apart, so the guard fired on
     // the one case it should have allowed and the menu item was a dead click.
     //
-    // The host page states which chrome it is (window.__EDGEDEPTH_LESSON__.chrome)
+    // The host page states which chrome it is (window.__TRADEOS_LESSON__.chrome)
     // rather than the client inferring it; absent means Course Studio, so nothing
     // that predates this changes.
     bool is_research_replay() const {
@@ -83,10 +83,10 @@ public:
     }
 
     // Event = an archived market-event replay (public /events → /terminal?event=<id>).
-    // Set from window.__EDGEDEPTH_EVENT__ = {sessionType:'archive', eventId, symbol,
+    // Set from window.__TRADEOS_EVENT__ = {sessionType:'archive', eventId, symbol,
     // seekToStart, startMs, endMs}. is_embedded() (above) is now TRUE for event, so
     // the React EventReplay chrome owns the shell + transport; EventRuntime mirrors
-    // the archive session's transport state to it (CustomEvent 'edgedepth:event') and
+    // the archive session's transport state to it (CustomEvent 'tradeos:event') and
     // applies its seek/pause/speed commands. The replay itself is auto-started by
     // main.cpp maybe_start_event_replay().
     bool is_event() const { return mode_ == Mode::Event; }
@@ -104,9 +104,9 @@ public:
     // live (active && !loading), then never again - the user owns the transport.
     int64_t event_seek_to_ms() const { return event_seek_to_ms_; }
 
-    // Pack = a CDN-served .edpack replay (Hot Replay Path B) - the box is out
+    // Pack = a CDN-served .tospack replay (Hot Replay Path B) - the box is out
     // of the loop entirely: no WebSocket, no session POST, no token. Set from
-    // window.__EDGEDEPTH_PACK__ = {url, symbol, embedded} (the /demo route) or
+    // window.__TRADEOS_PACK__ = {url, symbol, embedded} (the /demo route) or
     // the ?pack=<url>&packsym=<symbol> query params (standalone dev boots with
     // the native transport). The replay is auto-started by main.cpp
     // maybe_start_pack_replay() via ReplayManager::request_pack_replay.
@@ -117,14 +117,14 @@ public:
     const std::string& pack_symbol() const { return pack_symbol_; }
 
     // Pack deep-link/start-at timestamp (epoch ms; 0 = none): pk.seekToMs from
-    // __EDGEDEPTH_PACK__ (the /demo route bakes the catalog's startAtMs or the
+    // __TRADEOS_PACK__ (the /demo route bakes the catalog's startAtMs or the
     // ?t= deep link into it) or ?packt=<ms> on the standalone dev boot. Applied
     // by EventRuntime's one-shot deep-link path, same as event_seek_to_ms().
     int64_t pack_seek_to_ms() const { return pack_seek_to_ms_; }
 
     // Recorder script (CLIP_FACTORY P2) - ORTHOGONAL to the mode, not a mode:
     // the render harness boots a normal event/pack replay and ADDITIONALLY
-    // injects window.__EDGEDEPTH_RECORDER__ = <RecorderScript> before the glue
+    // injects window.__TRADEOS_RECORDER__ = <RecorderScript> before the glue
     // loads. detect() stashes the stringified script here; main() feeds it to
     // edu::RecorderRuntime::load(), which then drives the session's transport.
     bool has_recorder_script() const { return !recorder_json_.empty(); }
@@ -144,7 +144,7 @@ public:
     // or no symbol was provided.
     const std::string& studio_symbol() const { return studio_symbol_; }
 
-    // Read window.__EDGEDEPTH_LESSON__ once. Safe to call when not embedded
+    // Read window.__TRADEOS_LESSON__ once. Safe to call when not embedded
     // (leaves mode_ == None). Call early in main(), before url_push.
     void detect();
 
@@ -169,7 +169,7 @@ private:
     std::string event_symbol_;
     std::string pack_url_;
     std::string pack_symbol_;
-    std::string recorder_json_;  // stringified __EDGEDEPTH_RECORDER__ (or empty)
+    std::string recorder_json_;  // stringified __TRADEOS_RECORDER__ (or empty)
     bool pack_embedded_ = false;
     int64_t pack_checkpoint_ms_ = 0;
     bool pack_realtime_ = false;

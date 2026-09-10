@@ -1,90 +1,168 @@
 # TradeOS
 
-A local orderflow trading workbench. This repo vendors the **EdgeDepth Terminal**
-(C++20/WebAssembly, Dear ImGui + ImPlot, SDL3 + WebGL2) under [`terminal/`](terminal/)
-and layers TradeOS-specific tools, feed adapters, strategies and automation on top.
+> **SEE EVERYTHING. EXECUTE ANYTHING.**
 
-## Layout
+A local-first orderflow trading terminal and workbench that runs entirely in your
+browser. C++20 compiled to WebAssembly; Dear ImGui + ImPlot for immediate-mode
+rendering; SDL3 + WebGL2 underneath; protobuf over WebSocket for market data. No
+Electron, no DOM in the hot path, no garbage collector between you and the tape.
 
-```
-TradeOS/
-├── terminal/          # EdgeDepth Terminal (vendored from edgedepthhq/edgedepth-terminal)
-│   ├── src/           # C++/WASM client: chart, DOM, tape, heatmaps, replay, paper trading
-│   ├── protos/        # WebSocket wire format (protobuf)
-│   ├── examples/      # Reference Python feeds (synthetic, CSV/Parquet, dataframe)
-│   ├── tests/         # Native (non-WASM) tests
-│   ├── Dockerfile     # WASM build + nginx runtime image
-│   └── docs/          # Architecture, wire format, replay pack format, RT guide
-├── gateway/           # (planned) TradeOS market-data gateway — custom adapters
-├── strategies/        # (planned) Python/C++ strategies, backtests, alerts
-├── scripts/           # Top-level dev/build/run helpers
-├── docker-compose.yml # Wires terminal (+gateway when added) together
-└── README.md          # ← you are here
-```
+![TradeOS workspace](terminal/assets/screenshot.png)
 
-The `terminal/` subtree tracks the upstream EdgeDepth Terminal source. Patches that
-belong upstream go in via PRs there; TradeOS-only extensions live in top-level
-folders or as a small patch layer inside `terminal/`.
+This repository is TradeOS itself: the full renderer, the chart engine, the DOM
+ladder, trade tape, footprint, volume profile, TPO, liquidation heatmap, replay
+engine, replay library, paper trading, and workspace docking. It is not a demo
+build or a stripped-down "community edition" — every widget ships here.
+
+Run it against a local exchange feed, point it at your own wire-compatible data,
+or use deterministic `.edpack` recordings as repeatable fixtures.
 
 ## Quick start
 
-The fastest way to see it running is Docker Compose (pulls prebuilt WASM image
-and the community Binance Futures gateway):
+The fastest way to see it running is Docker Compose (pulls the prebuilt WASM
+image alongside the community Binance Futures gateway):
 
 ```bash
 docker compose up
 ```
 
-Then open **http://localhost:8080**.
+Then open **http://localhost:8080**. No API key, no account, no signup.
 
-This runs the exact same terminal you'd get from `edgedepthhq/edgedepth-terminal`
-— chart, DOM ladder, trade tape, heatmaps, replay library, paper trading — against
-the public Binance feed bridged by `edgedepth-gateway`. No account, no API key.
+To compile the WebAssembly from source instead of pulling prebuilt images:
+
+```bash
+docker compose up --build
+```
+
+**Browsers.** The canvas is threaded WebAssembly, so it needs WebGL2,
+`SharedArrayBuffer` and a cross-origin-isolated page; the bundled nginx sends the
+COOP/COEP headers that buys that. If the canvas never appears, check
+`crossOriginIsolated` in the console: `false` means something upstream (a proxy,
+an extension) stripped the headers.
+
+## Features
+
+- **Chart engine** — custom ImPlot candlesticks, multi-timeframe (1s to 1D), buy/sell volume + CVD, indicators (RSI, MACD, Volume, OI, funding), drawing tools, layered overlays.
+- **DOM ladder** — independent depth with grouping, USD/coin modes, trade columns, or an RT-linked view that shares the chart's price positions.
+- **Trade tape** — live time & sales with size highlighting.
+- **Orderbook heatmap** — GPU-rendered depth history via a shader-based renderer.
+- **Volume profile (VPVR) and footprint** — per-price volume, same-price and diagonal imbalances, consecutive same-side stacks.
+- **TPO / Market Profile** — 30-minute candle-range approximation.
+- **Liquidation heatmap layers** — dense Field, leverage-tier levels, profile rendering (computed client-side from candles; works on any feed).
+- **Market replay** — deterministic replay engine with scrubbing; self-contained `.edpack` files play entirely client-side.
+- **Replay Library** — a manifest-driven browser of curated `.edpack` recordings for local replay and regression testing.
+- **Paper trading** — simulated positions against live data.
+- **Docking layout** — drag, split, and persist panel arrangements (ImGui docking).
+- **Watchlist / scanner** — every symbol the feed lists, with 24h stats.
+- **Wire format** — zstd-compressed protobuf (`protos/messages.proto`), decoded off the render thread.
 
 ## Building from source
 
-To hack the C++ you need Emscripten ≥ 4.0.15 (SDL3 port), `protoc` 21.x, CMake
-and Ninja. See [`terminal/README.md`](terminal/README.md) for full platform
-instructions (Linux, WSL2, Windows, macOS).
+To hack the C++ you need:
 
-Quick Linux/WSL2 path once emsdk is active:
+- **Emscripten SDK** ≥ 4.0.15 (SDL3 port support — 3.x will not build)
+- **`protoc`** 21.x
+- **CMake** 3.15+ and **Ninja**
+- A working C++17 host compiler (for native tests)
+
+All other dependencies are fetched and pinned by CMake; there are no submodules.
 
 ```bash
-source scripts/dev-env.sh          # sets PATH for cmake/ninja/protoc/emcc
-edbuild Release                    # emcmake configure + build into build-Release/
-edserve 8000                       # COOP/COEP static server on :8000
+source scripts/dev-env.sh     # puts emcc/cmake/ninja/protoc on PATH, adds aliases
+edbuild Release               # emcmake configure + build -> terminal/build-Release/
+edserve 8000                  # COOP/COEP static server on http://localhost:8000
 ```
 
-Open http://localhost:8000.
+### Native tests
 
-## Pointing the terminal at your own data
+```bash
+edtests
+```
 
-The terminal is just a client. It resolves its WebSocket in this order:
+## Layout
 
-1. `?ws=ws://host:port/ws` on the query string
-2. `window.__EDGEDEPTH_WS_URL__` set by the host page before the glue loads
-3. `wss://api.edgedepth.com/ws` (hosted backend, default)
+```
+TradeOS/
+├── terminal/             # WASM client (C++/ImGui/ImPlot/SDL3/WebGL2)
+│   ├── src/core/         # data thread, orderbook, candles, footprint, heatmap, replay...
+│   ├── src/rendering/    # app shell, layout, menu, theme, shader renderers
+│   ├── src/ui/           # chart, DOM, tape, watchlist, indicators, drawings...
+│   ├── src/replayer/     # pack replay engine + history buffer
+│   ├── src/education/    # lesson / studio / recorder runtimes
+│   ├── protos/           # WebSocket wire format
+│   ├── examples/         # Python reference feeds (synthetic, CSV/Parquet)
+│   ├── design/           # design tokens, CSS, TradeOS logo/wordmark SVGs
+│   ├── replay-library/   # manifest + curated replay catalog
+│   └── tests/            # native (host g++) and WASM integration tests
+├── gateway/              # TradeOS market-data gateway adapters (planned)
+├── strategies/           # Pluggable strategies and backtests (planned)
+├── scripts/              # dev helpers (dev-env.sh, rebrand.py)
+└── docker-compose.yml    # terminal + community gateway on :8080
+```
 
-Wire format is documented in [`terminal/protos/messages.proto`](terminal/protos/messages.proto).
-Starter feeds live in [`terminal/examples/`](terminal/examples/) — see
-`synthetic_feed.py` for a zero-dependency random walk, and
-[`terminal/docs/DATAFRAME_WORKFLOW.md`](terminal/docs/DATAFRAME_WORKFLOW.md) for
-the CSV/Parquet walkthrough.
+## Bring your own data
 
-## Roadmap (TradeOS layer, on top of EdgeDepth)
+The terminal is a client. It resolves its WebSocket in this order:
 
-- **Custom feed adapters** — Bybit, Hyperliquid, Coinbase L3, OANDA, IBKR
-- **Strategy runner** — pluggable Python strategies with a chart overlay API
-- **Backtester** — drive strategies off recorded `.edpack` packs for repeatable tests
-- **Alerting + webhooks** — condition-triggered notifications to Discord/Telegram
-- **Multi-account paper trading** — isolated position books per strategy
-- **Research notebook** — Jupyter integration against the same protobuf wire format
+1. `?ws=ws://localhost:8080/ws` query parameter
+2. `window.__TRADEOS_WS_URL__` set by the host page before the WASM glue loads
+3. The hosted backend default (`wss://api.edgedepth.com/ws`)
 
-Contributions and PRs welcome. See [`terminal/CONTRIBUTING.md`](terminal/CONTRIBUTING.md)
-for the renderer conventions (no allocs in the frame path, `PriceFormatter` for
-all price text, theme tokens for colors).
+The schema in [`terminal/protos/messages.proto`](terminal/protos/messages.proto) is
+the contract. [`terminal/examples/synthetic_feed.py`](terminal/examples/synthetic_feed.py)
+is a working zero-dependency feed that answers historical candle requests and
+streams trades plus an order book — enough to drive the chart, the tape and the
+DOM.
 
-## License
+See [`terminal/docs/DATAFRAME_WORKFLOW.md`](terminal/docs/DATAFRAME_WORKFLOW.md)
+for a reproducible CSV/Parquet walkthrough that puts explicit trades on the
+chart, tape, footprint and volume profile with no exchange access.
 
-The vendored terminal retains its original [AGPL-3.0](terminal/LICENSE).
-TradeOS glue code (everything outside `terminal/`) is MIT unless noted.
+## Design system
+
+The TradeOS visual language:
+
+| Token | Value | Use |
+|---|---|---|
+| Background | `#0E1116` | App background, chart canvas |
+| Surface | `#14181D` | Panels, chrome |
+| Accent | `#C9A227` (gold) | Brand, selection, focus, on-state controls |
+| Text | `#F2EFE6` | Primary numerals, titles |
+| Up / bid | `#2FD6AD` (teal) | Up candles, bid side, positive deltas |
+| Down / ask | `#EE5C78` (rose) | Down candles, ask side, negative deltas |
+
+Tokens live in [`terminal/design/tokens.json`](terminal/design/tokens.json); the
+CSS mirror is [`terminal/design/tradeos.css`](terminal/design/tradeos.css).
+`terminal/src/rendering/theme.{h,cpp}` mirrors them into ImGui/ImPlot styles at
+runtime.
+
+Logo and wordmark SVGs:
+
+- [`terminal/design/logo.svg`](terminal/design/logo.svg) — TradeOS emblem
+  (open power-ring in charcoal with a gap at the top, one gold candlestick whose
+  wick rises through the gap, two charcoal depth bars behind the body).
+- [`terminal/design/logo-wordmark.svg`](terminal/design/logo-wordmark.svg) —
+  full lockup: emblem + "Trade" (charcoal) + "OS" (gold).
+
+## Contributing
+
+PRs welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md). The render loop has
+strict conventions: no allocation in the frame path, `PriceFormatter` for all
+price text, theme tokens for all colors.
+
+## See also
+
+- **[synthetic_feed.py](terminal/examples/synthetic_feed.py)** — drop-in
+  zero-dependency Python feed for local development.
+- **[edgedepth-gateway](https://github.com/edgedepthhq/edgedepth-gateway)** —
+  MIT-licensed Binance public-stream bridge (the default `docker compose` feed).
+- **[ARCHITECTURE.md](terminal/ARCHITECTURE.md)** — source-linked build,
+  threading, live-data, replay, rendering and browser-deployment design.
+- **[EDPACK.md](terminal/docs/EDPACK.md)** — deterministic replay container
+  format (magic/version, block index, framing, compression).
+- **[REALTIME_DEPTH.md](terminal/docs/REALTIME_DEPTH.md)** — RT observed-depth
+  view, retention, replay semantics.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).

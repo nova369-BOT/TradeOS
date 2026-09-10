@@ -21,7 +21,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SRC="${NOTO_CJK_TTC:-/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc}"
 OUT="$ROOT/fonts/NotoSansCJK-Subset.ttf"
-API="${SYMBOLS_METADATA_URL:-https://api.edgedepth.com/symbols/metadata}"
+API="${SYMBOLS_METADATA_URL:-https://api.tradeos.com/symbols/metadata}"
 
 [ -f "$SRC" ] || { echo "no CJK source at $SRC (set NOTO_CJK_TTC)" >&2; exit 1; }
 

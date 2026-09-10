@@ -89,16 +89,16 @@ int main() {
 
     // The full handoff URL: floors internally, normalizes internally.
     expect_eq(moment_url("BTC/USDT", t_mid_minute),
-              "https://edgedepth.com/research/workbench?source=record&study=investigate"
+              "https://tradeos.com/research/workbench?source=record&study=investigate"
               "&entry=terminal&moment=btcusdt,2026-08-01T13:57:00Z",
               "moment url");
     expect_eq(moment_url("blessusdt", t_minute, "feature.vpin,feature.taker_buy_ratio_15m"),
-              "https://edgedepth.com/research/workbench?source=record&study=investigate"
+              "https://tradeos.com/research/workbench?source=record&study=investigate"
               "&entry=terminal&moment=blessusdt,2026-08-01T13:57:00Z"
               "&mfields=feature.vpin,feature.taker_buy_ratio_15m",
               "moment url with mfields");
     expect_eq(moment_live_url("ETH/USDT"),
-              "https://edgedepth.com/research/workbench?source=record&study=investigate"
+              "https://tradeos.com/research/workbench?source=record&study=investigate"
               "&entry=terminal&moment=ethusdt,now",
               "live url");
     expect_eq(join_mfields({}), "", "join empty");
@@ -178,7 +178,7 @@ int main() {
     {
         const MoveSnap s = snap_move(t_2258, t_2258 + h3m10, 100.0, 110.0, 111.8, 99.0);
         expect_eq(outcome_first_url("BTC/USDT", s),
-                  "https://edgedepth.com/research/workbench?source=record&study=outcome-first"
+                  "https://tradeos.com/research/workbench?source=record&study=outcome-first"
                   "&entry=terminal&target=reached,up,0.1,4h&symbol=btcusdt"
                   "&at=2026-09-01T22:58:00Z&scope=sector",
                   "outcome-first url");

@@ -729,7 +729,7 @@ message ScannerEntry {
     double funding_rate = 10;
     double buy_ratio = 11;
     double flow_intensity = 12;
-    double edgedepth_score = 13;
+    double tradeos_score = 13;
     double cfti = 14;
     double smart_money_bias = 15;
     double spread_bps = 16;
@@ -745,7 +745,7 @@ message MarketScannerUpdate {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Replay pack (.edpack) - Hot Replay Path B. MIRRORS the backend's
+// Replay pack (.tospack) - Hot Replay Path B. MIRRORS the backend's
 // proto/replaypack.proto (field numbers frozen; keep in lockstep).
 // File layout: "EDPK" + version byte + u32 LE header len + PackHeader,
 // then zstd blocks at the header's (data-section-relative) offsets.

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-A synthetic EdgeDepth feed in one file, for driving the terminal with your own data.
+A synthetic TradeOS feed in one file, for driving the terminal with your own data.
 
     pip install websockets
     python3 examples/synthetic_feed.py
@@ -11,7 +11,7 @@ Then open the terminal against it:
 
 The terminal accepts any ws:// or wss:// URL in the ?ws= query parameter, so
 you can point it at a strategy, a simulator, or a replay of your own capture
-without touching the C++ or running the EdgeDepth backend.
+without touching the C++ or running the TradeOS backend.
 
 The wire format is two things:
 
@@ -27,7 +27,7 @@ passes anything else straight through, so this sends plain protobuf.
 The protobuf is hand-encoded below, which is why this example needs no protoc
 step and no protobuf package. Field numbers come from protos/messages.proto and
 must stay in step with it. For a real venue adapter, generate the bindings
-instead: see the Go gateway at github.com/edgedepthhq/edgedepth-gateway.
+instead: see the Go gateway at github.com/tradeoshq/tradeos-gateway.
 
 What shows up: the chart, the tape and the DOM. Candles are built client-side
 from the trade stream, so trades alone drive the chart. Panels fed by streams

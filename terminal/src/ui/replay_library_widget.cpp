@@ -36,7 +36,7 @@ EM_JS(char*, edrl_resolve_manifest_url, (), {
     var candidate = String();
     try {
         var query = new URLSearchParams(window.location.search).get('replayLibrary');
-        candidate = query || window['__EDGEDEPTH_REPLAY_LIBRARY_URL__'] || fallback;
+        candidate = query || window['__TRADEOS_REPLAY_LIBRARY_URL__'] || fallback;
         var resolved = new URL(candidate, window.location.href);
         if (resolved.protocol !== 'https:' && resolved.protocol !== 'http:') {
             resolved = new URL(fallback);
@@ -55,7 +55,7 @@ EM_JS(char*, edrl_resolve_manifest_url, (), {
 // manifest paints immediately, while every normal open still refreshes it.
 EM_JS(void, edrl_fetch_begin, (const char* url_ptr, int force), {
     var url = UTF8ToString(url_ptr);
-    var state = Module['__edReplayLibrary'];
+    var state = Module['__tosReplayLibrary'];
     if (!state || state.url !== url) {
         state = {
             url: url,
@@ -65,7 +65,7 @@ EM_JS(void, edrl_fetch_begin, (const char* url_ptr, int force), {
             error: String(),
             cacheTried: false
         };
-        Module['__edReplayLibrary'] = state;
+        Module['__tosReplayLibrary'] = state;
     }
     if (state.loading) return;
 
@@ -74,14 +74,14 @@ EM_JS(void, edrl_fetch_begin, (const char* url_ptr, int force), {
             throw new Error('Manifest is empty or exceeds 1 MB');
         }
         var parsed = JSON.parse(text);
-        if (!parsed || parsed.schema !== 'edgedepth.replay-library.v1' ||
+        if (!parsed || parsed.schema !== 'tradeos.replay-library.v1' ||
             !Array.isArray(parsed.packs)) {
             throw new Error('Unsupported replay-library manifest');
         }
         return text;
     };
 
-    var cacheKey = 'edgedepth.replay_library.v1:' + url;
+    var cacheKey = 'tradeos.replay_library.v1:' + url;
     if (!force && !state.cacheTried) {
         state.cacheTried = true;
         try {
@@ -102,7 +102,7 @@ EM_JS(void, edrl_fetch_begin, (const char* url_ptr, int force), {
     // that broad rule also catches /library/*. Manual Refresh is immediate.
     var requestUrl = new URL(url);
     requestUrl.searchParams.set(
-        '_edrl', force ? String(Date.now()) : String(Math.floor(Date.now() / 300000)));
+        '_tosrl', force ? String(Date.now()) : String(Math.floor(Date.now() / 300000)));
     fetch(requestUrl.href, {
         method: 'GET', cache: force ? 'reload' : 'no-cache', credentials: 'omit'
     })
@@ -123,7 +123,7 @@ EM_JS(void, edrl_fetch_begin, (const char* url_ptr, int force), {
 });
 
 EM_JS(int, edrl_status, (), {
-    var state = Module['__edReplayLibrary'];
+    var state = Module['__tosReplayLibrary'];
     if (!state) return 0;
     if (state.payload) return 2;
     if (state.loading) return 1;
@@ -132,17 +132,17 @@ EM_JS(int, edrl_status, (), {
 });
 
 EM_JS(int, edrl_loading, (), {
-    var state = Module['__edReplayLibrary'];
+    var state = Module['__tosReplayLibrary'];
     return state && state.loading ? 1 : 0;
 });
 
 EM_JS(int, edrl_revision, (), {
-    var state = Module['__edReplayLibrary'];
+    var state = Module['__tosReplayLibrary'];
     return state ? state.revision : 0;
 });
 
 EM_JS(char*, edrl_copy_payload, (), {
-    var state = Module['__edReplayLibrary'];
+    var state = Module['__tosReplayLibrary'];
     var value = state && state.payload ? state.payload : String();
     var n = lengthBytesUTF8(value) + 1;
     var p = _malloc(n);
@@ -151,7 +151,7 @@ EM_JS(char*, edrl_copy_payload, (), {
 });
 
 EM_JS(char*, edrl_copy_error, (), {
-    var state = Module['__edReplayLibrary'];
+    var state = Module['__tosReplayLibrary'];
     var value = state && state.error ? state.error : String();
     var n = lengthBytesUTF8(value) + 1;
     var p = _malloc(n);
@@ -275,7 +275,7 @@ bool ReplayLibraryWidget::parse_manifest(
         return false;
     }
     try {
-    if (doc.value("schema", std::string()) != "edgedepth.replay-library.v1") {
+    if (doc.value("schema", std::string()) != "tradeos.replay-library.v1") {
         parse_error = "Catalog schema is not supported by this terminal build";
         return false;
     }
@@ -412,7 +412,7 @@ void ReplayLibraryWidget::render_pack(const Pack& pack, int index) {
     }
     ImGui::PopStyleColor(4);
     ImGui::SameLine();
-    if (ImGui::Button("Download .edpack", ImVec2(138.0f, 26.0f))) {
+    if (ImGui::Button("Download .tospack", ImVec2(138.0f, 26.0f))) {
         edrl_open_url(pack.pack_url.c_str());
     }
     ImGui::SameLine();
@@ -534,7 +534,7 @@ void ReplayLibraryWidget::render() {
         ImGui::PushTextWrapPos(0.0f);
         ImGui::TextColored(
             Theme::Tokens::TX2,
-            "Your local terminal starts recording today. EdgeDepth has already "
+            "Your local terminal starts recording today. TradeOS has already "
             "been recording every supported Binance perp for months.");
         ImGui::PopTextWrapPos();
         char replay_offer[96];
@@ -553,7 +553,7 @@ void ReplayLibraryWidget::render() {
                  Entitlements::pro_lookback_days());
         if (ImGui::Button(replay_cta, ImVec2(176.0f, 28.0f))) {
             edrl_open_url(
-                "https://edgedepth.com/pricing?utm_source=terminal&"
+                "https://tradeos.com/pricing?utm_source=terminal&"
                 "utm_medium=replay_library&utm_campaign=oss_time_travel");
         }
         ImGui::PopStyleColor(4);

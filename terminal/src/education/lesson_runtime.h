@@ -61,7 +61,7 @@ public:
     // ─── C++ → JS state bridge ─────────────────────────────────────────────
     // Build the current lesson-state snapshot and, only when it has CHANGED in a
     // discrete field (phase / step / paused / speed), push it to JS:
-    //   window.__EDGEDEPTH_LESSON_STATE__ = {...}; + CustomEvent('edgedepth:lesson').
+    //   window.__TRADEOS_LESSON_STATE__ = {...}; + CustomEvent('tradeos:lesson').
     // The clock/progress ride along in each emit; React interpolates between
     // emits locally (paused+speed+clock+wall-time), so the scrubber stays smooth
     // without a per-frame boundary crossing. Call once per frame after update().

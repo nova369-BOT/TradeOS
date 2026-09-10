@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- TradeOS wordmark — "Trade" in charcoal #14181D, "OS" in gold #C9A227, geometric grotesque -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 160" width="520" height="160">
+  <defs>
+    <style>
+      .charcoal { fill: #14181D; font-family: "Hanken Grotesk", "Inter", "Helvetica Neue", Arial, sans-serif; font-weight: 700; }
+      .gold     { fill: #C9A227; font-family: "Hanken Grotesk", "Inter", "Helvetica Neue", Arial, sans-serif; font-weight: 700; }
+    </style>
+  </defs>
+  <g>
+    <!-- Emblem (small) -->
+    <g transform="translate(0,16) scale(0.25)">
+      <rect x="146" y="288" width="220" height="22" rx="6" fill="#14181D"/>
+      <rect x="170" y="326" width="172" height="22" rx="6" fill="#14181D"/>
+      <line x1="256" y1="118" x2="256" y2="372" stroke="#C9A227" stroke-width="10" stroke-linecap="round"/>
+      <rect x="222" y="232" width="68" height="108" rx="10" fill="#C9A227"/>
+      <path d="M 121,362 A 180,180 0 1,1 391,362" fill="none" stroke="#14181D" stroke-width="38" stroke-linecap="round"/>
+    </g>
+    <text class="charcoal" x="150" y="112" font-size="108" letter-spacing="-2">Trade</text>
+    <text class="gold"     x="400" y="112" font-size="108" letter-spacing="-2">OS</text>
+  </g>
+</svg>

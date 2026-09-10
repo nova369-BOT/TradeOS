@@ -1,8 +1,8 @@
-# EdgeDepth Pack (`.edpack`)
+# TradeOS Pack (`.edpack`)
 
-`.edpack` is the deterministic replay container used by the EdgeDepth
-terminal. EdgeDepth designed the format for this repository's replay
-engine; it is not an industry standard and nothing outside EdgeDepth
+`.edpack` is the deterministic replay container used by the TradeOS
+terminal. TradeOS designed the format for this repository's replay
+engine; it is not an industry standard and nothing outside TradeOS
 reads it today.
 
 One file holds an entire recorded market episode: the order book, the
@@ -114,7 +114,7 @@ a `sha256` and a `size_bytes` for its pack, so a downloaded pack can be
 verified against the manifest that advertised it.
 
 Determinism is a property of how packs are built, not something the
-file asserts about itself. EdgeDepth's builder re-reads the source event
+file asserts about itself. TradeOS's builder re-reads the source event
 archive with an independent iterator and requires the pack's frame
 sequence to be byte-identical: same count, same order, same
 `(ts_ms, stream, timeframe, payload)` for every frame, and an
@@ -189,7 +189,7 @@ subscription.
 ## Can I build one?
 
 Not yet, and this is the honest answer rather than a policy. The pack
-builder lives in EdgeDepth's private backend alongside the event
+builder lives in TradeOS's private backend alongside the event
 archive it reads, so there is no public `edpack build` today. The
 format above is complete enough to write a reader against, and the
 proto file in this repository is the whole contract.
@@ -199,10 +199,10 @@ supported path is the WebSocket contract rather than a hand-built pack:
 see the "Bring your own data" section of the [README](../README.md) and
 [`examples/synthetic_feed.py`](../examples/synthetic_feed.py).
 
-## Relationship to hosted EdgeDepth
+## Relationship to hosted TradeOS
 
 A pack is a single recorded episode someone chose to publish. The
-hosted [EdgeDepth Research](https://edgedepth.com/features/research)
+hosted [TradeOS Research](https://tradeos.com/features/research)
 surface is the other end of the same idea: instead of replaying one
 episode you already know about, you search the continuously recorded
 history for every minute that matched a condition, and open any match

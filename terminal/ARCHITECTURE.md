@@ -1,4 +1,4 @@
-# EdgeDepth Terminal architecture
+# TradeOS Terminal architecture
 
 This document describes the terminal that is checked into this repository: a C++20 application compiled to WebAssembly and rendered in a browser with Dear ImGui, ImPlot, SDL3, and WebGL2. It is intended to help contributors find the right ownership boundary before changing a feed, manager, widget, renderer, replay path, or browser integration.
 

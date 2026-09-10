@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// watchlist_widget.cpp - dense-grid watchlist (edgedepth v2, treatment 1b)
+// watchlist_widget.cpp - dense-grid watchlist (tradeos v2, treatment 1b)
 //
 // Header stack (non-scrolling): title bar · filter row · category + venue
 // selectors/popovers · SYMBOL/LAST/24H% sort chips. Then a scrolling

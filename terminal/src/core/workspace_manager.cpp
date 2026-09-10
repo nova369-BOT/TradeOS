@@ -20,17 +20,17 @@
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 EM_JS(char*, workspace_read, (), {
-    try { const value = localStorage.getItem('edgedepth.workspaces.v1') || '';
+    try { const value = localStorage.getItem('tradeos.workspaces.v1') || '';
           if (value.length > 4194304) return 0;
           return stringToNewUTF8(value); } catch (_) { return 0; }
 });
 EM_JS(int, workspace_write, (const char* text), {
-    try { localStorage.setItem('edgedepth.workspaces.v1', UTF8ToString(text)); return 1; }
+    try { localStorage.setItem('tradeos.workspaces.v1', UTF8ToString(text)); return 1; }
     catch (_) { return 0; }
 });
 EM_JS(void, workspace_export, (const char* text), {
     const url = URL.createObjectURL(new Blob([UTF8ToString(text)], {type:'application/json'}));
-    const a = document.createElement('a'); a.href = url; a.download = 'edgedepth-workspace.json';
+    const a = document.createElement('a'); a.href = url; a.download = 'tradeos-workspace.json';
     a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
 EM_JS(void, workspace_import, (), {

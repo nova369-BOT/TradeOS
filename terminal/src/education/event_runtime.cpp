@@ -57,7 +57,7 @@ void EventRuntime::update(const AppContext& ctx) {
     // latch closes and the user owns the transport.
     if (!deep_link_seek_done_) {
         // Event deep link (?event=…&t=…) or the pack's start-at / ?t= target
-        // (__EDGEDEPTH_PACK__.seekToMs - /demo bakes the catalog startAtMs or a
+        // (__TRADEOS_PACK__.seekToMs - /demo bakes the catalog startAtMs or a
         // key-moment deep link into it). Same one-shot deliberate-seek contract.
         int64_t want = EducationBoot::instance().event_seek_to_ms();
         if (want <= 0) want = EducationBoot::instance().pack_seek_to_ms();
@@ -229,7 +229,7 @@ void EventRuntime::emit_state(const AppContext& ctx) {
         st["progress"] = static_cast<double>(off) / static_cast<double>(span);
     }
 
-    transport::dispatch_state("edgedepth:event", "__EDGEDEPTH_EVENT_STATE__", st.dump());
+    transport::dispatch_state("tradeos:event", "__TRADEOS_EVENT_STATE__", st.dump());
 #else
     (void)ctx;
 #endif

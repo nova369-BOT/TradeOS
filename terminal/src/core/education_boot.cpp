@@ -23,12 +23,12 @@ extern "C" {
 }
 
 void EducationBoot::detect() {
-    // Read window.__EDGEDEPTH_LESSON__ into a malloc'd C string of the form
+    // Read window.__TRADEOS_LESSON__ into a malloc'd C string of the form
     // "<mode>\n<docUrl>" (docUrl may be empty for studio), or 0 if the global is
     // absent. Two fields, newline-separated, so one EM_ASM_PTR returns both.
     char* raw = reinterpret_cast<char*>(EM_ASM_PTR({
         try {
-            var cfg = window.__EDGEDEPTH_LESSON__;
+            var cfg = window.__TRADEOS_LESSON__;
             if (!cfg) return 0;
             var mode = String(cfg.mode || (cfg.docUrl ? "lesson" : ""));
             var url = String(cfg.docUrl || "");
@@ -48,7 +48,7 @@ void EducationBoot::detect() {
             stringToUTF8(s, buf, len + 1);
             return buf;
         } catch (e) {
-            console.warn('EducationBoot: failed reading __EDGEDEPTH_LESSON__:', e);
+            console.warn('EducationBoot: failed reading __TRADEOS_LESSON__:', e);
             return 0;
         }
     }));
@@ -88,13 +88,13 @@ void EducationBoot::detect() {
     }
 
     // No lesson/studio global → maybe this is an archived market-event replay.
-    // The web sets window.__EDGEDEPTH_EVENT__ = {sessionType:'archive', eventId,
-    // symbol, seekToStart} before the glue loads (mirrors __EDGEDEPTH_LESSON__).
+    // The web sets window.__TRADEOS_EVENT__ = {sessionType:'archive', eventId,
+    // symbol, seekToStart} before the glue loads (mirrors __TRADEOS_LESSON__).
     // Three newline-separated fields: eventId \n symbol \n seekToStart(1|0).
     if (mode_ == Mode::None) {
         char* eraw = reinterpret_cast<char*>(EM_ASM_PTR({
             try {
-                var ev = window.__EDGEDEPTH_EVENT__;
+                var ev = window.__TRADEOS_EVENT__;
                 if (!ev || !ev.eventId) return 0;
                 // Six newline-separated fields: eventId \n symbol \n seekToStart \n
                 // startMs \n endMs \n seekToMs. The window (epoch ms) lets EventRuntime
@@ -109,7 +109,7 @@ void EducationBoot::detect() {
                 stringToUTF8(s, buf, len + 1);
                 return buf;
             } catch (e) {
-                console.warn('EducationBoot: failed reading __EDGEDEPTH_EVENT__:', e);
+                console.warn('EducationBoot: failed reading __TRADEOS_EVENT__:', e);
                 return 0;
             }
         }));
@@ -142,7 +142,7 @@ void EducationBoot::detect() {
     }
 
     // No lesson/studio/event global → maybe a CDN-served pack replay
-    // (Hot Replay Path B). Host page: window.__EDGEDEPTH_PACK__ = {url, symbol,
+    // (Hot Replay Path B). Host page: window.__TRADEOS_PACK__ = {url, symbol,
     // embedded}; standalone dev: ?pack=<url>&packsym=<symbol> query params.
     if (mode_ == Mode::None) {
         char* praw = reinterpret_cast<char*>(EM_ASM_PTR({
@@ -152,7 +152,7 @@ void EducationBoot::detect() {
                 var emb = "0";
                 var skt = "0";
                 var rt = "0";
-                var pk = window.__EDGEDEPTH_PACK__;
+                var pk = window.__TRADEOS_PACK__;
                 if (pk && pk.url) {
                     url = String(pk.url);
                     sym = String(pk.symbol || "");
@@ -182,7 +182,7 @@ void EducationBoot::detect() {
                 stringToUTF8(s, buf, len + 1);
                 return buf;
             } catch (e) {
-                console.warn('EducationBoot: failed reading __EDGEDEPTH_PACK__:', e);
+                console.warn('EducationBoot: failed reading __TRADEOS_PACK__:', e);
                 return 0;
             }
         }));
@@ -204,7 +204,7 @@ void EducationBoot::detect() {
             pack_embedded_ = (parts[2] == "1");
             pack_realtime_ = (parts[4] == "1");
             pack_checkpoint_ms_ = static_cast<int64_t>(EM_ASM_DOUBLE({
-                const t = window.__EDGEDEPTH_PACK__?.checkpointMs;
+                const t = window.__TRADEOS_PACK__?.checkpointMs;
                 return Number.isSafeInteger(t) && t > 0 && t < 4102444800000 ? t : 0;
             }));
             pack_seek_to_ms_ = parts[3].empty() ? 0 : std::strtoll(parts[3].c_str(), nullptr, 10);
@@ -217,12 +217,12 @@ void EducationBoot::detect() {
     // Recorder script (CLIP_FACTORY P2) - read LAST and INDEPENDENTLY of the
     // mode chain above: the render harness boots a normal event/pack replay
     // (those globals, exactly as today) and ADDITIONALLY injects
-    // window.__EDGEDEPTH_RECORDER__ = <RecorderScript>. The script is
+    // window.__TRADEOS_RECORDER__ = <RecorderScript>. The script is
     // stringified whole; main() hands it to edu::RecorderRuntime::load().
     {
         char* rraw = reinterpret_cast<char*>(EM_ASM_PTR({
             try {
-                var rc = window.__EDGEDEPTH_RECORDER__;
+                var rc = window.__TRADEOS_RECORDER__;
                 if (!rc) {
                     // Dev boot (mirrors ?pack=): a URL-encoded RecorderScript in
                     // the ?recorder= query param, so standalone serve_threaded
@@ -237,7 +237,7 @@ void EducationBoot::detect() {
                 stringToUTF8(s, buf, len + 1);
                 return buf;
             } catch (e) {
-                console.warn('EducationBoot: failed reading __EDGEDEPTH_RECORDER__:', e);
+                console.warn('EducationBoot: failed reading __TRADEOS_RECORDER__:', e);
                 return 0;
             }
         }));

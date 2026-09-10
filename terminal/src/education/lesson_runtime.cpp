@@ -852,7 +852,7 @@ void LessonRuntime::emit_state(const AppContext& ctx) {
     }
     steps_emitted_ = true;
 
-    transport::dispatch_state("edgedepth:lesson", "__EDGEDEPTH_LESSON_STATE__", st.dump());
+    transport::dispatch_state("tradeos:lesson", "__TRADEOS_LESSON_STATE__", st.dump());
 #else
     (void)ctx;
 #endif

@@ -51,7 +51,7 @@ constexpr const char* kMsgEdgeFallback =
     "The record has not reached this minute yet. It rebuilds nightly and runs about 27 to 40 "
     "hours behind live.";
 constexpr const char* kMsgNoBridge =
-    "This read needs the EdgeDepth page around the terminal. Open Research directly instead.";
+    "This read needs the TradeOS page around the terminal. Open Research directly instead.";
 constexpr const char* kMsgTimeout = "The page did not answer. Open Research directly instead.";
 constexpr const char* kMsgBadResult = "The read came back malformed. Open Research directly instead.";
 constexpr const char* kCtaSearch = "Find moments like this";
@@ -79,7 +79,7 @@ void emit_moment_usage(const char* event, const std::string& symbol, int64_t min
 
 bool bridge_present() {
 #ifdef __EMSCRIPTEN__
-    return EM_ASM_INT({ return window.__EDGEDEPTH_RESEARCH_BRIDGE__ === 1 ? 1 : 0; }) == 1;
+    return EM_ASM_INT({ return window.__TRADEOS_RESEARCH_BRIDGE__ === 1 ? 1 : 0; }) == 1;
 #else
     return false;
 #endif
@@ -168,8 +168,8 @@ void ResearchMomentPanel::send_request(bool live) {
     req["live"] = live;
     emit_moment_usage("research_moment_read", symbol_norm_, minute_ms_, live,
                       {{"request_id", req_seq_}});
-    edu::transport::dispatch_state("edgedepth:research-moment",
-                                   "__EDGEDEPTH_RESEARCH_MOMENT_REQ__", req.dump());
+    edu::transport::dispatch_state("tradeos:research-moment",
+                                   "__TRADEOS_RESEARCH_MOMENT_REQ__", req.dump());
 }
 
 void ResearchMomentPanel::consume_pending_result() {
@@ -180,9 +180,9 @@ void ResearchMomentPanel::consume_pending_result() {
     // the global so a stale result can never be re-read.
     char* raw = reinterpret_cast<char*>(EM_ASM_PTR({
         try {
-            var s = window.__EDGEDEPTH_RESEARCH_MOMENT_RESULT__;
+            var s = window.__TRADEOS_RESEARCH_MOMENT_RESULT__;
             if (!s) return 0;
-            delete window.__EDGEDEPTH_RESEARCH_MOMENT_RESULT__;
+            delete window.__TRADEOS_RESEARCH_MOMENT_RESULT__;
             s = String(s);
             var len = lengthBytesUTF8(s);
             var buf = _malloc(len + 1);
@@ -582,7 +582,7 @@ void ResearchMomentPanel::render_body() {
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // KEEPALIVE result callback - the bridge calls Module.__research_moment_result()
-// after staging window.__EDGEDEPTH_RESEARCH_MOMENT_RESULT__. Mirrors the
+// after staging window.__TRADEOS_RESEARCH_MOMENT_RESULT__. Mirrors the
 // _studio_cmd_set_source convention: defined WITH a leading underscore,
 // exported as __research_moment_result in BOTH CMake EXPORTED_FUNCTIONS lists.
 // ═══════════════════════════════════════════════════════════════════════════════

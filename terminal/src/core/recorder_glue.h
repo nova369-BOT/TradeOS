@@ -12,7 +12,7 @@
 // listed in CMakeLists EXPORTED_FUNCTIONS as __recorder_on_state - the C++ state
 // below mirrors what the browser ACTUALLY did, so the button reflects reality.
 //
-// Output: edgedepth_{symbol}_{yyyymmdd_hhmm}.{webm|mp4} - the timestamp is the
+// Output: tradeos_{symbol}_{yyyymmdd_hhmm}.{webm|mp4} - the timestamp is the
 // REPLAY DATA position (UTC, matches the burned watermark), never wall clock;
 // the extension matches the negotiated container from the codec fallback chain
 // (vp9 → vp8 → webm → mp4). While recording, tick_and_render() burns the
@@ -82,7 +82,7 @@ void tick_and_render(bool replay_active);
 // /studio, driven by StudioRuntime (which owns WHEN to start/stop - this module
 // owns HOW). Differences from the P1 share-clip path, all deliberate:
 //   · AUDIO - a live narration take: React puts {ctx: AudioContext, stream:
-//     getUserMedia(mic+cam)} on window.__EDGEDEPTH_EXPORT_MEDIA__ before the
+//     getUserMedia(mic+cam)} on window.__TRADEOS_EXPORT_MEDIA__ before the
 //     export command; the JS glue wires mic → MediaStreamAudioDestinationNode →
 //     addTrack() onto the canvas captureStream, and re-negotiates the container
 //     WITH audio codecs (vp9,opus → vp8,opus → webm → mp4, still via
@@ -93,10 +93,10 @@ void tick_and_render(bool replay_active);
 //     list, so captureStream sees it (anything React-side is invisible to the
 //     recording - in-render compositing is the whole point).
 //   · CAP - kMaxExportMs (15:00) instead of 3:00; a lesson runs its length.
-//   · BADGE - the EDGEDEPTH · SYM · REPLAY date line stays (brand watermark),
+//   · BADGE - the TRADEOS · SYM · REPLAY date line stays (brand watermark),
 //     the REC dot + elapsed timer are DROPPED: this is a produced video, not a
 //     live share-clip.
-//   · FILENAME - edgedepth_{lesson_slug}_{yyyymmdd_hhmm}.{ext}; timestamp is the
+//   · FILENAME - tradeos_{lesson_slug}_{yyyymmdd_hhmm}.{ext}; timestamp is the
 //     lesson window START (replay DATA date, UTC) - wall clock never appears.
 //
 // P1 interlock: one MediaRecorder slot. export_start() no-ops while a P1 clip
@@ -121,7 +121,7 @@ void export_start(const char* slug, const char* symbol_upper, int64_t lesson_sta
 // replay session take exactly this path too.
 void export_stop();
 
-// Release a stashed-but-unconsumed window.__EDGEDEPTH_EXPORT_MEDIA__ (mic/cam
+// Release a stashed-but-unconsumed window.__TRADEOS_EXPORT_MEDIA__ (mic/cam
 // tracks + AudioContext) - the export was cancelled/refused BEFORE the capture
 // consumed it, and without this the tab's mic indicator stays lit. Safe no-op
 // while a capture is running (the glue's own cleanup owns it from then on).

@@ -85,7 +85,7 @@ static ReplayManager* g_replay_instance = nullptr;
 
 #ifdef __EMSCRIPTEN__
 EM_JS(char*, edx_copy_replay_token, (), {
-    var token = (window.__EDGEDEPTH_REPLAY_TOKEN__ || "").toString();
+    var token = (window.__TRADEOS_REPLAY_TOKEN__ || "").toString();
     var len = lengthBytesUTF8(token) + 1;
     var buf = _malloc(len);
     stringToUTF8(token, buf, len);
@@ -109,12 +109,12 @@ static std::string current_replay_token() {
 // Creating on hub and joining on server 2 would produce a session id the
 // joining box has never heard of.
 //
-// wss://replay-api.edgedepth.com/ws  ->  https://replay-api.edgedepth.com
-// Unset (the default) -> https://api.edgedepth.com, i.e. exactly today's
+// wss://replay-api.tradeos.com/ws  ->  https://replay-api.tradeos.com
+// Unset (the default) -> https://api.tradeos.com, i.e. exactly today's
 // behaviour, so this is inert until the host page opts in.
 // The box that serves live, archives and symbol metadata. Also the fallback
 // replay origin when no separate one is configured.
-static constexpr const char* kHubHttpBase = "https://api.edgedepth.com";
+static constexpr const char* kHubHttpBase = "https://api.tradeos.com";
 
 static std::string replay_http_base() {
     static const char* kDefaultBase = kHubHttpBase;
@@ -122,7 +122,7 @@ static std::string replay_http_base() {
     char* raw = reinterpret_cast<char*>(EM_ASM_PTR({
         try {
             var url = new URLSearchParams(window.location.search).get('replay_ws') ||
-                      window.__EDGEDEPTH_REPLAY_WS_URL__ || "";
+                      window.__TRADEOS_REPLAY_WS_URL__ || "";
             url = String(url);
             if (url.indexOf('ws://') !== 0 && url.indexOf('wss://') !== 0) return 0;
             // Scheme swap, then drop the path: ws->http, wss->https.
@@ -309,16 +309,16 @@ void ReplayManager::request_replay(
         // off DISK, and the wasm began beating it. Bounded at ~2s so a genuinely
         // tokenless boot still reaches the backend and gets a real coded error
         // instead of a spinner that never resolves.
-        var __edx_began = Date.now();
-        var __edx_send = function() {
-            var __edx_tok = "";
-            try { __edx_tok = (window.__EDGEDEPTH_REPLAY_TOKEN__ || "").toString(); } catch (e) {}
-            if (!__edx_tok && Date.now() - __edx_began < 2000) {
-                setTimeout(__edx_send, 25);
+        var __tosrx_began = Date.now();
+        var __tosrx_send = function() {
+            var __tosrx_tok = "";
+            try { __tosrx_tok = (window.__TRADEOS_REPLAY_TOKEN__ || "").toString(); } catch (e) {}
+            if (!__tosrx_tok && Date.now() - __tosrx_began < 2000) {
+                setTimeout(__tosrx_send, 25);
                 return;
             }
             // Still OPENED, never SENT, so setting the header here is legal.
-            if (__edx_tok) xhr.setRequestHeader('Authorization', 'Bearer ' + __edx_tok);
+            if (__tosrx_tok) xhr.setRequestHeader('Authorization', 'Bearer ' + __tosrx_tok);
             xhr.send(body);
         };
 
@@ -351,7 +351,7 @@ void ReplayManager::request_replay(
             _free(buf);
         };
 
-        __edx_send();
+        __tosrx_send();
     }, body.c_str(), base.c_str());
 #else
     // Non-WASM fallback (for testing)
@@ -456,16 +456,16 @@ void ReplayManager::request_archive_replay(
         // off DISK, and the wasm began beating it. Bounded at ~2s so a genuinely
         // tokenless boot still reaches the backend and gets a real coded error
         // instead of a spinner that never resolves.
-        var __edx_began = Date.now();
-        var __edx_send = function() {
-            var __edx_tok = "";
-            try { __edx_tok = (window.__EDGEDEPTH_REPLAY_TOKEN__ || "").toString(); } catch (e) {}
-            if (!__edx_tok && Date.now() - __edx_began < 2000) {
-                setTimeout(__edx_send, 25);
+        var __tosrx_began = Date.now();
+        var __tosrx_send = function() {
+            var __tosrx_tok = "";
+            try { __tosrx_tok = (window.__TRADEOS_REPLAY_TOKEN__ || "").toString(); } catch (e) {}
+            if (!__tosrx_tok && Date.now() - __tosrx_began < 2000) {
+                setTimeout(__tosrx_send, 25);
                 return;
             }
             // Still OPENED, never SENT, so setting the header here is legal.
-            if (__edx_tok) xhr.setRequestHeader('Authorization', 'Bearer ' + __edx_tok);
+            if (__tosrx_tok) xhr.setRequestHeader('Authorization', 'Bearer ' + __tosrx_tok);
             xhr.send(body);
         };
 
@@ -498,7 +498,7 @@ void ReplayManager::request_archive_replay(
             _free(buf);
         };
 
-        __edx_send();
+        __tosrx_send();
     }, body.c_str(), base.c_str());
 #else
     info_.error_message = "Replay requires WASM build";
@@ -678,7 +678,7 @@ void ReplayManager::join_session() {
     if (!ws() || !ws()->is_connected()) {
         // WS not up yet? Don't error - the studio path fires request_replay as
         // soon as the wasm runtime is ready (calledRun), which is earlier than
-        // the WS handshake to wss://api.edgedepth.com/ws. Latch and let
+        // the WS handshake to wss://api.tradeos.com/ws. Latch and let
         // flush_pending_join() send it once is_connected() flips. (The session
         // is already created on the backend in Creating state; we just need a
         // live socket to join it.)

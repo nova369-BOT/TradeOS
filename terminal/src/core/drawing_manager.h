@@ -24,7 +24,7 @@
 class DrawingManager {
 public:
     // Loads the per-symbol set from localStorage (key
-    // edgedepth.drawings.v1:<exchange>:<symbol>). Symbol switches are full page
+    // tradeos.drawings.v1:<exchange>:<symbol>). Symbol switches are full page
     // navigations, so one init at boot is the whole lifecycle.
     void init(const std::string& exchange, const std::string& symbol);
 

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// pack_replay_engine.cpp - .edpack replay: fetch, clock, drip, seek, seeds.
+// pack_replay_engine.cpp - .tospack replay: fetch, clock, drip, seek, seeds.
 // See pack_replay_engine.h for the architecture note.
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -28,11 +28,11 @@ using json = nlohmann::json;
 PackReplayEngine* PackReplayEngine::s_active_ = nullptr;
 
 // ─── JS→C++ fetch trampoline ────────────────────────────────────────────────
-// Exported as __edpack_on_fetch (CMake EXPORTED_FUNCTIONS, BOTH lists). The JS
+// Exported as __tospack_on_fetch (CMake EXPORTED_FUNCTIONS, BOTH lists). The JS
 // side mallocs, calls, frees - we copy synchronously into a stashed response.
 extern "C" {
 EMSCRIPTEN_KEEPALIVE
-void _edpack_on_fetch(int generation, int kind, int block_idx,
+void _tospack_on_fetch(int generation, int kind, int block_idx,
                       uint8_t* data, int len, int status) {
     if (auto* eng = PackReplayEngine::active_instance()) {
         eng->on_fetch(generation, kind, block_idx, data, len, status);
@@ -127,11 +127,11 @@ void PackReplayEngine::fetch_range(int kind, int block_idx, int64_t from, int64_
             var bytes = ok ? new Uint8Array(xhr.response) : new Uint8Array(0);
             var ptr = _malloc(bytes.length > 0 ? bytes.length : 1);
             if (bytes.length > 0) HEAPU8.set(bytes, ptr);
-            Module.__edpack_on_fetch(gen, kind, blk, ptr, bytes.length, xhr.status);
+            Module.__tospack_on_fetch(gen, kind, blk, ptr, bytes.length, xhr.status);
             _free(ptr);
         };
         xhr.onerror = function() {
-            Module.__edpack_on_fetch(gen, kind, blk, 0, 0, 0);
+            Module.__tospack_on_fetch(gen, kind, blk, 0, 0, 0);
         };
         xhr.send();
     }, url_.c_str(), static_cast<double>(from), static_cast<double>(to),

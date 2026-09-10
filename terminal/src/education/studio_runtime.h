@@ -38,7 +38,7 @@ public:
     void update(const AppContext& ctx);
 
     // Per-frame, after update(). Pushes transport state (clock/progress/paused/
-    // speed/window/loading) to the React chrome via a CustomEvent('edgedepth:studio').
+    // speed/window/loading) to the React chrome via a CustomEvent('tradeos:studio').
     // Dirty-checked on the DISCRETE fields (clock/progress excluded) so it emits on
     // transitions, not every frame - React interpolates the clock between emits,
     // exactly like the lesson player. Mirrors LessonRuntime::emit_state but far
@@ -48,7 +48,7 @@ public:
     // JS → C++: the picker chose a source. The source JSON
     //   {"symbol":"btcusdt","startMs":<ms>,"endMs":<ms>,"tf":"5m"}
     // crosses via the window global __STUDIO_SOURCE__ (read inside the export's
-    // EM_ASM, same seam as EducationBoot's __EDGEDEPTH_LESSON__) - so no malloc/
+    // EM_ASM, same seam as EducationBoot's __TRADEOS_LESSON__) - so no malloc/
     // stringToUTF8 needs exporting to external JS. This setter is called from that
     // export with the parsed string. Enqueued (not applied here): update(ctx)
     // drains it with a live context, the same enqueue/drain split LessonRuntime
@@ -79,7 +79,7 @@ public:
     // React arms ONE capture gesture (__studio_cmd_arm_capture): the author drags
     // a box on the chart; we inverse-project the pixel rect via chart_projection's
     // time_of_x / price_of_y and dispatch a one-shot
-    // CustomEvent('edgedepth:capture', {mode,t0,t1,pTop,pBot}) back to the React
+    // CustomEvent('tradeos:capture', {mode,t0,t1,pTop,pBot}) back to the React
     // inspector, then disarm. mode: 0 = disarm, 1 = region box, 2 = price band.
     // Esc cancels (emits {cancelled:true} so the inspector's arm state resets).
     void cmd_arm_capture(int mode);

@@ -10,7 +10,7 @@
 namespace {
 
 EM_JS(void, edtz_bootstrap, (), {
-    if (Module.__edtz) return;
+    if (Module.__tostz) return;
     const normalize = (raw) => {
         if (typeof raw !== 'string' || !raw.trim()) return null;
         const value = raw.trim();
@@ -36,7 +36,7 @@ EM_JS(void, edtz_bootstrap, (), {
         } catch (_) { return null; }
     };
     const cookie = () => {
-        const prefix = 'edgedepth_time_zone_v1=';
+        const prefix = 'tradeos_time_zone_v1=';
         for (const segment of document.cookie.split(';')) {
             const value = segment.trim();
             if (value.startsWith(prefix)) {
@@ -46,10 +46,10 @@ EM_JS(void, edtz_bootstrap, (), {
         return null;
     };
     let stored = null;
-    try { stored = localStorage.getItem('edgedepth_time_zone_v1'); } catch (_) {}
-    const pref = parse(window.__EDGEDEPTH_TIME_ZONE__) || parse(cookie()) || parse(stored) ||
+    try { stored = localStorage.getItem('tradeos_time_zone_v1'); } catch (_) {}
+    const pref = parse(window.__TRADEOS_TIME_ZONE__) || parse(cookie()) || parse(stored) ||
         {version: 1, mode: browserZone() === 'UTC' ? 'utc' : 'local', time_zone: browserZone()};
-    Module.__edtz = {
+    Module.__tostz = {
         normalize, browserZone, parse, pref,
         formatters: new Map(), offsetFormatters: new Map()
     };
@@ -57,35 +57,35 @@ EM_JS(void, edtz_bootstrap, (), {
     const notifyCpp = (candidate) => {
         const next = parse(candidate);
         if (!next) return;
-        Module.__edtz.pref = next;
+        Module.__tostz.pref = next;
         if (Module.calledRun && typeof Module.__display_time_zone_changed === 'function') {
             try { Module.__display_time_zone_changed(); } catch (_) {}
         }
     };
-    window.addEventListener('edgedepth:time-zone-preference', (event) => {
+    window.addEventListener('tradeos:time-zone-preference', (event) => {
         if (event.detail && event.detail.kind === 'display') notifyCpp(event.detail.preference);
     });
     window.addEventListener('storage', (event) => {
-        if (event.key === 'edgedepth_time_zone_v1' && event.newValue) notifyCpp(event.newValue);
+        if (event.key === 'tradeos_time_zone_v1' && event.newValue) notifyCpp(event.newValue);
     });
 });
 
 EM_JS(int, edtz_read_preference, (char* out, int cap), {
-    const value = JSON.stringify(Module.__edtz.pref);
+    const value = JSON.stringify(Module.__tostz.pref);
     if (lengthBytesUTF8(value) + 1 > cap) return 0;
     stringToUTF8(value, out, cap);
     return 1;
 });
 
 EM_JS(int, edtz_browser_zone, (char* out, int cap), {
-    const value = Module.__edtz.browserZone();
+    const value = Module.__tostz.browserZone();
     if (lengthBytesUTF8(value) + 1 > cap) return 0;
     stringToUTF8(value, out, cap);
     return 1;
 });
 
 EM_JS(int, edtz_validate_zone, (const char* raw, char* out, int cap), {
-    const value = Module.__edtz.normalize(UTF8ToString(raw));
+    const value = Module.__tostz.normalize(UTF8ToString(raw));
     if (!value || lengthBytesUTF8(value) + 1 > cap) return 0;
     stringToUTF8(value, out, cap);
     return 1;
@@ -95,23 +95,23 @@ EM_JS(void, edtz_persist_preference, (int mode, const char* zoneRaw), {
     const names = ['local', 'utc', 'named'];
     const modeName = names[mode] || 'utc';
     const requested = UTF8ToString(zoneRaw);
-    const zone = modeName === 'local' ? Module.__edtz.browserZone()
-        : modeName === 'utc' ? 'UTC' : Module.__edtz.normalize(requested);
+    const zone = modeName === 'local' ? Module.__tostz.browserZone()
+        : modeName === 'utc' ? 'UTC' : Module.__tostz.normalize(requested);
     if (!zone) return;
     const pref = {version: 1, mode: modeName, time_zone: zone};
-    Module.__edtz.pref = pref;
-    window.__EDGEDEPTH_TIME_ZONE__ = pref;
+    Module.__tostz.pref = pref;
+    window.__TRADEOS_TIME_ZONE__ = pref;
     const raw = JSON.stringify(pref);
-    try { localStorage.setItem('edgedepth_time_zone_v1', raw); } catch (_) {}
-    const shared = /(^|[.])edgedepth[.]com$/i.test(location.hostname)
-        ? '; Domain=.edgedepth.com' : String();
+    try { localStorage.setItem('tradeos_time_zone_v1', raw); } catch (_) {}
+    const shared = /(^|[.])tradeos[.]com$/i.test(location.hostname)
+        ? '; Domain=.tradeos.com' : String();
     const secure = location.protocol === 'https:' ? '; Secure' : String();
-    document.cookie = 'edgedepth_time_zone_v1=' + encodeURIComponent(raw) +
+    document.cookie = 'tradeos_time_zone_v1=' + encodeURIComponent(raw) +
         '; Path=/; Max-Age=31536000; SameSite=Lax' + shared + secure;
-    window.dispatchEvent(new CustomEvent('edgedepth:time-zone-preference', {
+    window.dispatchEvent(new CustomEvent('tradeos:time-zone-preference', {
         detail: {kind: 'display', preference: pref}
     }));
-    window.dispatchEvent(new CustomEvent('edgedepth:time-zone-change', {detail: pref}));
+    window.dispatchEvent(new CustomEvent('tradeos:time-zone-change', {detail: pref}));
 });
 
 EM_JS(int, edtz_supported_zones, (char* out, int cap), {
@@ -126,7 +126,7 @@ EM_JS(int, edtz_supported_zones, (char* out, int cap), {
     const seen = new Set();
     const zones = [];
     for (const rawZone of ['UTC', ...rawZones]) {
-        const zone = Module.__edtz.normalize(rawZone);
+        const zone = Module.__tostz.normalize(rawZone);
         if (zone && !seen.has(zone)) {
             seen.add(zone);
             zones.push(zone);
@@ -144,15 +144,15 @@ EM_JS(int, edtz_format_epoch, (double epochMs, const char* zoneRaw, int style, c
     const zone = UTF8ToString(zoneRaw);
     const needsSeconds = style === 0 || style === 3 || style === 9;
     const key = zone + '|' + (needsSeconds ? 's' : 'm');
-    let formatter = Module.__edtz.formatters.get(key);
+    let formatter = Module.__tostz.formatters.get(key);
     if (!formatter) {
-        if (Module.__edtz.formatters.size >= 16) Module.__edtz.formatters.clear();
+        if (Module.__tostz.formatters.size >= 16) Module.__tostz.formatters.clear();
         formatter = new Intl.DateTimeFormat('en-US', {
             timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit',
             weekday: 'short', hour: '2-digit', minute: '2-digit',
             ...(needsSeconds ? {second: '2-digit'} : {}), hourCycle: 'h23'
         });
-        Module.__edtz.formatters.set(key, formatter);
+        Module.__tostz.formatters.set(key, formatter);
     }
     const parts = Object.create(null);
     for (const part of formatter.formatToParts(new Date(epochMs))) {
@@ -183,14 +183,14 @@ EM_JS(int, edtz_offset_label, (double epochMs, const char* zoneRaw, char* out, i
     let value = 'UTC+00:00';
     if (zone !== 'UTC') {
         try {
-            let formatter = Module.__edtz.offsetFormatters.get(zone);
+            let formatter = Module.__tostz.offsetFormatters.get(zone);
             if (!formatter) {
-                if (Module.__edtz.offsetFormatters.size >= 64)
-                    Module.__edtz.offsetFormatters.clear();
+                if (Module.__tostz.offsetFormatters.size >= 64)
+                    Module.__tostz.offsetFormatters.clear();
                 formatter = new Intl.DateTimeFormat('en-US', {
                     timeZone: zone, timeZoneName: 'longOffset'
                 });
-                Module.__edtz.offsetFormatters.set(zone, formatter);
+                Module.__tostz.offsetFormatters.set(zone, formatter);
             }
             const part = formatter.formatToParts(new Date(epochMs))
                 .find((p) => p.type === 'timeZoneName');

@@ -13,12 +13,12 @@
 // hands off to /research via research_url.h.
 //
 // Relay contract (the studio set_source pattern, in reverse):
-//   C++ →  window.__EDGEDEPTH_RESEARCH_MOMENT_REQ__ = {reqId, symbol, iso, live}
-//          + CustomEvent 'edgedepth:research-moment'   (transport_emit dispatch)
-//   web →  window.__EDGEDEPTH_RESEARCH_MOMENT_RESULT__ = JSON string
+//   C++ →  window.__TRADEOS_RESEARCH_MOMENT_REQ__ = {reqId, symbol, iso, live}
+//          + CustomEvent 'tradeos:research-moment'   (transport_emit dispatch)
+//   web →  window.__TRADEOS_RESEARCH_MOMENT_RESULT__ = JSON string
 //          + Module.__research_moment_result()          (void KEEPALIVE export)
 // The bridge (the web app's researchMomentBridge.ts, installed by
-// TerminalEmbed) advertises itself as window.__EDGEDEPTH_RESEARCH_BRIDGE__=1;
+// TerminalEmbed) advertises itself as window.__TRADEOS_RESEARCH_BRIDGE__=1;
 // without it (standalone serve) the panel falls back to "open Research".
 //
 // Auth outcomes never render here: AUTH_REQUIRED routes to the login variant

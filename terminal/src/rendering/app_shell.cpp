@@ -214,35 +214,48 @@ namespace {
         }
     }
 
-    // brand mark: the EdgeDepth "D" - three forward depth streaks flowing into a
-    // D bowl. Ported from the master SVG (viewBox 300x132); `h` is the glyph
-    // height (the streak+bowl block spans 104 SVG units, y 14..118).
+    // brand mark: the TradeOS emblem — open power-ring (charcoal) with gap at
+    // the top, one gold candlestick whose upper wick rises through the gap,
+    // plus two short charcoal depth bars behind the candle body.
+    // viewBox 300x300, centred at (150,160), `h` is the rendered block height.
     void draw_brand_mark(ImDrawList* dl, ImVec2 pos, float h) {
-        const ImU32 col = u32(Tokens::BRAND);
-        const float s = h / 104.0f;                 // SVG units -> px
+        const float s = h / 150.0f;                 // SVG units -> px
         auto P = [&](float x, float y) {
-            return ImVec2(pos.x + (x - 8.0f) * s, pos.y + (y - 14.0f) * s);
+            return ImVec2(pos.x + (x - 30.0f) * s, pos.y + (y - 75.0f) * s);
         };
-        // three forward streaks (exact parallelograms from the master mark)
-        dl->AddQuadFilled(P(58, 14),  P(138, 14), P(126, 40),  P(46, 40),  col);
-        dl->AddQuadFilled(P(20, 53),  P(154, 53), P(142, 79),  P(8, 79),   col);
-        dl->AddQuadFilled(P(49, 92),  P(129, 92), P(117, 118), P(37, 118), col);
-        // the D: solid FILLED glyph (matches the master SVG's filled path, not a
-        // stroked outline). Two horizontal bars + a right half-annulus bowl swept
-        // between the outer (72x52) and inner (42x26) ellipse boundaries about the
-        // bowl centre (208,66); the sweep joins the bars seamlessly at +/-pi/2.
-        dl->AddQuadFilled(P(151, 14), P(208, 14), P(207, 40),  P(139, 40),  col);  // top bar
-        dl->AddQuadFilled(P(138, 92), P(207, 92), P(208, 118), P(126, 118), col);  // bottom bar
-        constexpr int NB = 28;
-        for (int i = 0; i < NB; ++i) {
-            const float t0 = -1.5707963f + 3.1415927f * static_cast<float>(i)     / NB;
-            const float t1 = -1.5707963f + 3.1415927f * static_cast<float>(i + 1) / NB;
-            const ImVec2 o0 = P(208.0f + 72.0f * cosf(t0), 66.0f + 52.0f * sinf(t0));
-            const ImVec2 o1 = P(208.0f + 72.0f * cosf(t1), 66.0f + 52.0f * sinf(t1));
-            const ImVec2 i0 = P(208.0f + 42.0f * cosf(t0), 66.0f + 26.0f * sinf(t0));
-            const ImVec2 i1 = P(208.0f + 42.0f * cosf(t1), 66.0f + 26.0f * sinf(t1));
-            dl->AddQuadFilled(o0, o1, i1, i0, col);
+        const ImU32 ink    = u32(Tokens::PANEL);    // #14181D charcoal ring & depth bars
+        const ImU32 gold   = u32(Tokens::BRAND);    // #C9A227 candlestick
+
+        // two depth bars behind the candle body
+        dl->AddRectFilled(P(82, 178), P(218, 192), ink, 4.0f * s);
+        dl->AddRectFilled(P(96, 200), P(204, 214), ink, 4.0f * s);
+
+        // candlestick wick (thin gold line rising through the ring gap)
+        dl->AddLine(P(150, 92), P(150, 228), gold, 5.0f * s);
+
+        // candlestick body (rounded rect)
+        dl->AddRectFilled(P(128, 156), P(172, 208), gold, 6.0f * s);
+
+        // open power ring - arc from ~210deg to ~150deg (gap at top for wick)
+        // ring centre (150,165), outer radius 100, thickness 20
+        const ImVec2 c(P(150.0f, 165.0f));
+        const float rOut = 100.0f * s;
+        const float rIn  = 80.0f  * s;
+        constexpr int SEG = 60;
+        const float a0 = 2.1642f;     // ~124deg (start, lower-left)
+        const float a1 = 7.2582f;     // ~416deg (end, lower-right after gap)
+        const float thick = 20.0f * s;
+        dl->PathClear();
+        for (int i = 0; i <= SEG; ++i) {
+            const float t = a0 + (a1 - a0) * static_cast<float>(i) / SEG;
+            dl->PathLineTo(ImVec2(c.x + cosf(t) * rOut, c.y + sinf(t) * rOut));
         }
+        for (int i = SEG; i >= 0; --i) {
+            const float t = a0 + (a1 - a0) * static_cast<float>(i) / SEG;
+            dl->PathLineTo(ImVec2(c.x + cosf(t) * rIn, c.y + sinf(t) * rIn));
+        }
+        dl->PathFillConvex(ink);
+        (void)thick;
     }
 
     // (stat_cell removed - the v2 stats strip draws its six flex cells inline in
@@ -367,7 +380,7 @@ namespace {
         if (ImGui::BeginPopup("##account_menu")) {
             ImDrawList* dl = ImGui::GetWindowDrawList();
             const std::string email = Entitlements::user_email();
-            const char* email_c = email.empty() ? "you@edgedepth" : email.c_str();
+            const char* email_c = email.empty() ? "you@tradeos" : email.c_str();
             const ImVec2 o = ImGui::GetCursorScreenPos();
 
             // ── header: square avatar · email · plan badge (3a) ──────────────
@@ -1063,32 +1076,34 @@ namespace {
 
         const float cy = (Layout::TOPBAR_H - 30.0f) * 0.5f;
 
-        // ── brand - D mark + edgedepth wordmark + EARLY ACCESS pill, links to
-        //    the homepage. Mirrors the web AppHeader / design-system Brand lockup:
-        //    the mark reads at ~wordmark height, a 9px mark->word gap and a 12px
-        //    word->pill gap, and a hairline accent pill. ──
-        const float mark_h = 12.0f;                            // streak-block height (~= wordmark)
-        const float mark_w = 272.0f * mark_h / 104.0f;         // full mark render width (~31px)
+        // ── brand - emblem + "TradeOS" wordmark + tagline pill, links to the
+        //    homepage. Mark at wordmark height, 9px mark->word gap, 12px
+        //    word->pill gap. "Trade" renders in primary text, "OS" in brand gold.
+        const float mark_h = 22.0f;                            // emblem block height
+        const float mark_w = mark_h;                           // emblem is square
         const float gap1 = 9.0f, gap2 = 12.0f;                 // mark->word, word->pill
-        ImGui::PushFont(Fonts::mono_md());
-        const float word_w  = ImGui::CalcTextSize("edgedepth").x;
-        const float word_fs = ImGui::GetFontSize();
+        ImGui::PushFont(Fonts::ui_semibold());
+        const float word_trade_w  = ImGui::CalcTextSize("Trade").x;
+        const float word_os_w     = ImGui::CalcTextSize("OS").x;
+        const float word_w        = word_trade_w + word_os_w;
+        const float word_fs       = ImGui::GetFontSize();
         ImGui::PopFont();
-        // EARLY ACCESS pill - match the web .beta badge (small SemiBold mono +
-        // 0.12em tracking) instead of the oversized mono_sm regular it used before.
-        static const char* const kBeta = "EARLY ACCESS";
+        // Tagline pill: "SEE EVERYTHING. EXECUTE ANYTHING." — brand tagline set in
+        // small mono with 0.12em letter-spacing, the same treatment the old beta
+        // pill used so sizing stays stable.
+        static const char* const kTagline = "SEE EVERYTHING. EXECUTE ANYTHING.";
         ImGui::PushFont(Fonts::mono_xs());
-        ImFont*      beta_font = ImGui::GetFont();
-        const float  beta_fs   = ImGui::GetFontSize();
-        const ImVec2 beta_ts0  = ImGui::CalcTextSize(kBeta);
+        ImFont*      tag_font = ImGui::GetFont();
+        const float  tag_fs   = ImGui::GetFontSize();
+        const ImVec2 tag_ts0  = ImGui::CalcTextSize(kTagline);
         ImGui::PopFont();
-        const float beta_track  = beta_fs * 0.12f;              // 0.12em letter-spacing
-        const float beta_text_w = beta_ts0.x + beta_track * static_cast<float>(strlen(kBeta) - 1);
-        const ImVec2 beta_ts(beta_text_w, beta_ts0.y);
-        const float beta_padx = 6.0f, beta_pady = 2.0f;
-        const float beta_w = beta_ts.x + beta_padx * 2.0f;
-        const float beta_h = beta_ts.y + beta_pady * 2.0f;
-        const float brand_w = mark_w + gap1 + word_w + gap2 + beta_w;
+        const float tag_track  = tag_fs * 0.08f;
+        const float tag_text_w = tag_ts0.x + tag_track * static_cast<float>(strlen(kTagline) - 1);
+        const ImVec2 tag_ts(tag_text_w, tag_ts0.y);
+        const float tag_padx = 6.0f, tag_pady = 2.0f;
+        const float tag_w = tag_ts.x + tag_padx * 2.0f;
+        const float tag_h = tag_ts.y + tag_pady * 2.0f;
+        const float brand_w = mark_w + gap1 + word_w + gap2 + tag_w;
 
         ImGui::SetCursorPos(ImVec2(12.0f, cy));
         const ImVec2 bp = ImGui::GetCursorScreenPos();
@@ -1098,16 +1113,18 @@ namespace {
 
         draw_brand_mark(dl, ImVec2(bp.x, mid - mark_h * 0.5f), mark_h);
 
-        ImGui::PushFont(Fonts::mono_md());
-        dl->AddText(ImVec2(bp.x + mark_w + gap1, mid - word_fs * 0.5f), u32(Tokens::TX1), "edgedepth");
+        ImGui::PushFont(Fonts::ui_semibold());
+        const float word_x = bp.x + mark_w + gap1;
+        dl->AddText(ImVec2(word_x, mid - word_fs * 0.5f), u32(Tokens::TX1), "Trade");
+        dl->AddText(ImVec2(word_x + word_trade_w, mid - word_fs * 0.5f), u32(Tokens::BRAND_TX), "OS");
         ImGui::PopFont();
 
-        const float beta_x = bp.x + mark_w + gap1 + word_w + gap2;
-        dl->AddRect(ImVec2(beta_x, mid - beta_h * 0.5f), ImVec2(beta_x + beta_w, mid + beta_h * 0.5f),
-                    u32(Tokens::BRAND), 0.0f, 0, 1.0f);
-        draw_tracked_text(dl, beta_font, beta_fs,
-                          ImVec2(beta_x + beta_padx, mid - beta_ts.y * 0.5f),
-                          u32(Tokens::BRAND_TX), kBeta, beta_track);
+        const float tag_x = bp.x + mark_w + gap1 + word_w + gap2;
+        dl->AddRect(ImVec2(tag_x, mid - tag_h * 0.5f), ImVec2(tag_x + tag_w, mid + tag_h * 0.5f),
+                    u32(Tokens::BRAND_LINE), 0.0f, 0, 1.0f);
+        draw_tracked_text(dl, tag_font, tag_fs,
+                          ImVec2(tag_x + tag_padx, mid - tag_ts.y * 0.5f),
+                          u32(Tokens::BRAND_TX), kTagline, tag_track);
 
         if (brand_click) {
 #ifdef __EMSCRIPTEN__
@@ -1157,7 +1174,7 @@ namespace {
         };
 
         // ── account pill (far right) + notifications bell ────────────────────
-        // Hosted only. Self-hosted there is no EdgeDepth account behind this
+        // Hosted only. Self-hosted there is no TradeOS account behind this
         // stack, and the tier default is Pro, so rendering the pill showed a
         // signed-in "PRO . FOUNDER RATE" user who does not exist, in the same
         // window as an Unlock CTA. Skipping it also leaves rx where it was, so
@@ -1319,7 +1336,7 @@ namespace {
             if (tb_button("Courses", courses_w)) {
 #ifdef __EMSCRIPTEN__
                 EM_ASM({
-                    window.open('https://app.edgedepth.com/learn?utm_source=terminal'
+                    window.open('https://app.tradeos.com/learn?utm_source=terminal'
                                 + '&utm_medium=topbar&utm_campaign=courses',
                                 '_blank', 'noopener');
                 });

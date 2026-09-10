@@ -2,7 +2,7 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // stream_presence.h - which wire streams have ever delivered a frame.
 //
-// Several panels are driven by EdgeDepth's hosted analytics streams (VPIN,
+// Several panels are driven by TradeOS's hosted analytics streams (VPIN,
 // positioning, scanner scores, modelled liquidation levels). On a self-hosted
 // raw-data feed those streams never arrive and the panels sit blank forever,
 // which reads as broken. Entitlements cannot distinguish the cases: bare mode

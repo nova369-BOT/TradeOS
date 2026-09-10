@@ -1,6 +1,7 @@
 /* ============================================================
-   edgedepth - design system v0.1
-   Near-black cool charcoal · teal/magenta · viridis heatmap
+   tradeos - design system
+   Charcoal surfaces (#0E1116 / #14181D), gold accent (#C9A227),
+   off-white text (#F2EFE6), teal/rose market data, viridis heatmap.
    Tokens first, then components. Tweak hooks live on <body data-*>.
    ============================================================ */
 
@@ -13,27 +14,27 @@ input{font:inherit;color:inherit}
 
 /* ---- Tokens ----------------------------------------------- */
 :root{
-  /* surfaces - cool near-black ramp */
-  --bg-base:#05070a;
-  --bg-panel:#0a0e12;
-  --bg-elev:#0d1217;
-  --bg-input:#11171d;
-  --bg-hover:#161d25;
-  --bg-active:#1d2630;
+  /* surfaces - charcoal ramp */
+  --bg-base:#0E1116;
+  --bg-panel:#14181D;
+  --bg-elev:#1B2028;
+  --bg-input:#14181D;
+  --bg-hover:#1B2028;
+  --bg-active:#1B2028;
 
   /* hairlines */
-  --bd-1:rgba(150,168,184,.07);
-  --bd-2:rgba(150,168,184,.13);
-  --bd-3:rgba(150,168,184,.22);
-  --grid:rgba(150,168,184,.045);
+  --bd-1:rgba(154,163,178,.07);
+  --bd-2:rgba(154,163,178,.13);
+  --bd-3:rgba(201,162,39,.32);
+  --grid:rgba(154,163,178,.05);
 
-  /* text ramp */
-  --tx-1:#e9eff5;
-  --tx-2:#98aab8;
-  --tx-3:#5f6f7c;
-  --tx-4:#3a4651;
+  /* text ramp - off-white primary */
+  --tx-1:#F2EFE6;
+  --tx-2:#9AA3B2;
+  --tx-3:#626B79;
+  --tx-4:#626B79;
 
-  /* semantic - teal up / magenta-rose down (colorblind-safer) */
+  /* semantic - teal up / rose down (colorblind-safer) */
   --up:#15c99e;
   --down:#ff4d6d;
   --up-soft:rgba(21,201,158,.13);
@@ -41,11 +42,11 @@ input{font:inherit;color:inherit}
   --up-line:rgba(21,201,158,.5);
   --down-line:rgba(255,77,109,.5);
 
-  /* brand accent - cyan, used sparingly for focus/active/replay */
-  --brand:#22c5db;
-  --brand-soft:rgba(34,197,219,.14);
-  --brand-line:rgba(34,197,219,.55);
-  --warn:#f3b24a;
+  /* brand accent - gold */
+  --brand:#C9A227;
+  --brand-soft:rgba(201,162,39,.14);
+  --brand-line:rgba(201,162,39,.55);
+  --warn:#f0b350;
 
   /* viridis stops (liq heatmap legend) */
   --vir-0:#440154;--vir-1:#414487;--vir-2:#2a788e;
@@ -68,9 +69,11 @@ input{font:inherit;color:inherit}
 body[data-candles="classic"]{--up:#26d07a;--down:#ff4d5e;--up-soft:rgba(38,208,122,.13);--down-soft:rgba(255,77,94,.13);--up-line:rgba(38,208,122,.5);--down-line:rgba(255,77,94,.5)}
 body[data-candles="muted"]{--up:#41a583;--down:#cf6173;--up-soft:rgba(65,165,131,.13);--down-soft:rgba(207,97,115,.13);--up-line:rgba(65,165,131,.45);--down-line:rgba(207,97,115,.45)}
 /* tweak: accent */
+body[data-accent="gold"]{--brand:#C9A227;--brand-soft:rgba(201,162,39,.14);--brand-line:rgba(201,162,39,.55)}
 body[data-accent="indigo"]{--brand:#6d8bff;--brand-soft:rgba(109,139,255,.15);--brand-line:rgba(109,139,255,.55)}
 body[data-accent="amber"]{--brand:#f3b24a;--brand-soft:rgba(243,178,74,.15);--brand-line:rgba(243,178,74,.55)}
 body[data-accent="mono"]{--brand:#aab8c4;--brand-soft:rgba(170,184,196,.13);--brand-line:rgba(170,184,196,.45)}
+body[data-accent="teal"]{--brand:#35c9c4;--brand-soft:rgba(53,201,196,.14);--brand-line:rgba(53,201,196,.55)}
 
 /* ---- Base ------------------------------------------------- */
 body{

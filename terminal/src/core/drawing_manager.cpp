@@ -28,9 +28,9 @@ EM_JS(void, eddraw_write_blob, (const char* key, const char* val), {
 // pagehide/visibility flush so a tab close within the 1s debounce window
 // doesn't lose the last mutation (display_time_zone bootstrap pattern).
 EM_JS(void, eddraw_register_flush, (), {
-    if (Module.__eddraw_flush_registered) return;
-    Module.__eddraw_flush_registered = true;
-    const kick = () => { try { Module._edgedepth_drawings_flush(); } catch (e) {} };
+    if (Module.__tosdraw_flush_registered) return;
+    Module.__tosdraw_flush_registered = true;
+    const kick = () => { try { Module._tradeos_drawings_flush(); } catch (e) {} };
     addEventListener('pagehide', kick);
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') kick();
@@ -47,14 +47,14 @@ DrawingManager* g_drawing_mgr_instance = nullptr;
 #ifdef __EMSCRIPTEN__
 extern "C" {
 EMSCRIPTEN_KEEPALIVE
-void edgedepth_drawings_flush() {
+void tradeos_drawings_flush() {
     if (g_drawing_mgr_instance) g_drawing_mgr_instance->flush();
 }
 }
 #endif
 
 void DrawingManager::init(const std::string& exchange, const std::string& symbol) {
-    storage_key_ = "edgedepth.drawings.v1:" + exchange + ":" + symbol;
+    storage_key_ = "tradeos.drawings.v1:" + exchange + ":" + symbol;
     // Seed the id counter from wall-clock ms so ids stay unique across sessions
     // (ids also key undo ops; collisions would silently cross-wire restores).
     next_id_ = static_cast<uint64_t>(

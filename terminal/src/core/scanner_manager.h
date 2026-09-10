@@ -3,7 +3,7 @@
 // scanner_manager.h - Market scanner data for symbol picker
 //
 // Receives MarketScannerUpdate protobufs from the DataThread.
-// Provides per-symbol microstructure scores (EdgeDepth Score, VPIN,
+// Provides per-symbol microstructure scores (TradeOS Score, VPIN,
 // Hawkes BR, cascade risk, funding rate) for display in the symbol picker.
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -15,7 +15,7 @@
 namespace pb { class MarketScannerUpdate; }
 
 struct ScannerEntry {
-    double edgedepth_score = 0.0;  // 0-100 composite
+    double tradeos_score = 0.0;  // 0-100 composite
     double vpin            = 0.0;  // 0-1
     double hawkes_br       = 0.0;  // 0-1+
     double cascade_risk    = 0.0;  // 0-1

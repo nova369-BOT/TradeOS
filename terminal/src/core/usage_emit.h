@@ -4,7 +4,7 @@
 //
 // Mirrors education/transport_emit.h's dispatch mechanic, but for PRODUCT usage
 // rather than transport state: build a JSON `detail` object and dispatch a window
-// CustomEvent 'edgedepth:usage'. The web usageBridge listens for it, attaches
+// CustomEvent 'tradeos:usage'. The web usageBridge listens for it, attaches
 // {user (server-derived), anonId, sessionId}, and fans out to Umami (aggregate)
 // + POST /api/usage (per-user). C++ never touches window.umami directly - one
 // enrichment point (design §8).
@@ -30,14 +30,14 @@
 
 namespace usage {
 
-// Dispatch a fully-built detail JSON string as CustomEvent('edgedepth:usage').
+// Dispatch a fully-built detail JSON string as CustomEvent('tradeos:usage').
 inline void dispatch_detail(const std::string& detail_json) {
 #ifdef __EMSCRIPTEN__
     EM_ASM(
         {
             try {
                 var d = JSON.parse(UTF8ToString($0));
-                window.dispatchEvent(new CustomEvent('edgedepth:usage', { detail: d }));
+                window.dispatchEvent(new CustomEvent('tradeos:usage', { detail: d }));
             } catch (e) {
                 console.warn('usage dispatch: bad payload', e);
             }
@@ -49,7 +49,7 @@ inline void dispatch_detail(const std::string& detail_json) {
 }
 
 // One-shot read of a window string global for boot enrichment (plan, referrer).
-// `global_name` is a bare identifier on window, e.g. "__EDGEDEPTH_TIER__". Returns
+// `global_name` is a bare identifier on window, e.g. "__TRADEOS_TIER__". Returns
 // "" when unset. Not for hot paths.
 inline std::string read_window_string(const char* global_name) {
 #ifdef __EMSCRIPTEN__

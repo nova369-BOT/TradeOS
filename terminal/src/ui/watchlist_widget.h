@@ -1,6 +1,6 @@
 #pragma once
 // ═══════════════════════════════════════════════════════════════════════════════
-// watchlist_widget.h - Symbol watchlist sidebar (edgedepth v2 · dense grid 1b)
+// watchlist_widget.h - Symbol watchlist sidebar (tradeos v2 · dense grid 1b)
 //
 // Docked left rail at Layout::WATCHLIST_W (384px). A non-scrolling header stack
 // (title bar · filter row · category + venue selectors · SYMBOL/LAST/24H% sort

@@ -1,6 +1,6 @@
 #pragma once
 // ═══════════════════════════════════════════════════════════════════════════════
-// dom_widget.h - Order ladder (DOM), edgedepth design-system rework
+// dom_widget.h - Order ladder (DOM), tradeos design-system rework
 //
 // 6-column grid: buys · bids · PRICE · asks · sells · Δ
 //   - bid/ask depth cells colored on the OCEAN ramp (small=deep blue →

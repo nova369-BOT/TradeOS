@@ -623,7 +623,7 @@ set(WASM_EXPORTED_FUNCTIONS
         __event_cmd_restart
         __replay_cmd_scrub_hover
         __recorder_on_state
-        __edpack_on_fetch
+        __tospack_on_fetch
         __display_time_zone_changed
         __research_moment_result
 )

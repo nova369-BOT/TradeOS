@@ -3,7 +3,7 @@
 //
 // ONE file owns every line of JS (EM_JS below) + the C++ state machine + the
 // burned-in watermark. Conventions:
-//   · JS state lives in Module['__edclip'] (module scope survives between calls)
+//   · JS state lives in Module['__tosclip'] (module scope survives between calls)
 //   · JS→C++ is ONLY _recorder_on_state(int,double) (EXPORTED_FUNCTIONS:
 //     __recorder_on_state) - the transport button renders whatever the browser
 //     reports, never what C++ hopes happened
@@ -67,7 +67,7 @@ unsigned int g_cam_tex          = 0;   // GL texture for the cam bubble (lazy, r
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // Probe once at boot. Negotiates the container/codec (vp9 → vp8 → webm → mp4),
-// stashes the pick in Module['__edclip'], returns 0 when recording can't work
+// stashes the pick in Module['__tosclip'], returns 0 when recording can't work
 // (the button renders disabled). Returns 1+index of the pick for the boot log.
 EM_JS(int, edclip_js_probe, (), {
     try {
@@ -81,7 +81,7 @@ EM_JS(int, edclip_js_probe, (), {
             ['video/webm',            'webm'],
             ['video/mp4',             'mp4']
         ];
-        var st = Module['__edclip'] = {
+        var st = Module['__tosclip'] = {
             mime: null, ext: null, rec: null, stream: null,
             chunks: [], bytes: 0, fname: "", timer: 0
         };
@@ -106,12 +106,12 @@ EM_JS(int, edclip_js_probe, (), {
 // Bitrate is explicit - the ~2.5Mbps MediaRecorder default smears candles/text.
 // We ask for ~0.1 bits/pixel/frame of the BACKING store (hiDPI canvases carry
 // the full backing resolution, which is exactly what captureStream records),
-// clamped to 8-20 Mbps. Filename = edgedepth_{symbol}_{date}.{ext} - date_str is
+// clamped to 8-20 Mbps. Filename = tradeos_{symbol}_{date}.{ext} - date_str is
 // derived from the REPLAY DATA position (UTC), never wall clock; ext is the
 // negotiated container from the probe, never hardcoded.
 EM_JS(int, edclip_js_start, (const char* symbol_lower, const char* date_str), {
     try {
-        var st = Module['__edclip'];
+        var st = Module['__tosclip'];
         if (!st || !st.mime || st.rec) return 0;
         var canvas = Module['canvas'];
         var fps = 30;  // see header comment - 60 tanked render FPS (readback+encode)
@@ -126,7 +126,7 @@ EM_JS(int, edclip_js_start, (const char* symbol_lower, const char* date_str), {
         st.stream = stream;
         st.chunks = [];
         st.bytes = 0;
-        st.fname = 'edgedepth_' + UTF8ToString(symbol_lower) + '_' +
+        st.fname = 'tradeos_' + UTF8ToString(symbol_lower) + '_' +
                    UTF8ToString(date_str) + '.' + st.ext;
         rec.ondataavailable = function(e) {
             if (e.data && e.data.size > 0) {
@@ -183,7 +183,7 @@ EM_JS(int, edclip_js_start, (const char* symbol_lower, const char* date_str), {
 // Stop → onstop → identical blob/download path for user stop AND the 3:00 cap.
 EM_JS(void, edclip_js_stop, (), {
     try {
-        var st = Module['__edclip'];
+        var st = Module['__tosclip'];
         if (!st || !st.rec) return;
         if (st.timer) { clearTimeout(st.timer); st.timer = 0; }
         if (st.rec.state !== 'inactive') st.rec.stop();
@@ -194,14 +194,14 @@ EM_JS(void, edclip_js_stop, (), {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// Export mode JS (CLIP_FACTORY P3-v1) - same Module['__edclip'] slot, second
+// Export mode JS (CLIP_FACTORY P3-v1) - same Module['__tosclip'] slot, second
 // entry point. Probes its OWN container ladder (audio-aware) per export; the P1
 // boot probe/pick (st.mime/st.ext) is never touched.
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // Begin the export capture. Returns 0 = can't record, 1 = video-only, 2 = A/V.
 //
-// Reads window.__EDGEDEPTH_EXPORT_MEDIA__ = { ctx: AudioContext, stream:
+// Reads window.__TRADEOS_EXPORT_MEDIA__ = { ctx: AudioContext, stream:
 // MediaStream } (stashed by StudioShell inside the Export click - the
 // AudioContext is constructed synchronously in the user gesture so it boots
 // 'running'; getUserMedia already carries the permission). Absent/denied media
@@ -221,16 +221,16 @@ EM_JS(int, edclip_js_export_begin, (const char* slug, const char* date_str), {
             typeof MediaRecorder.isTypeSupported !== 'function') return 0;
         // Boot probe may have bailed before creating the slot (unsupported for
         // P1 means unsupported here too, but keep the slot logic self-sufficient).
-        var st = Module['__edclip'];
+        var st = Module['__tosclip'];
         if (!st) {
-            st = Module['__edclip'] = {
+            st = Module['__tosclip'] = {
                 mime: null, ext: null, rec: null, stream: null,
                 chunks: [], bytes: 0, fname: "", timer: 0
             };
         }
         if (st.rec) return 0;  // P1 clip or another export already running
 
-        var media = window.__EDGEDEPTH_EXPORT_MEDIA__ || null;
+        var media = window.__TRADEOS_EXPORT_MEDIA__ || null;
         var mediaStream = media && media.stream ? media.stream : null;
         var audioTracks = mediaStream ? mediaStream.getAudioTracks() : [];
         var videoTracks = mediaStream ? mediaStream.getVideoTracks() : [];
@@ -299,7 +299,7 @@ EM_JS(int, edclip_js_export_begin, (const char* slug, const char* date_str), {
         st.chunks = [];
         st.bytes = 0;
         st.export = 1;
-        st.fname = 'edgedepth_' + UTF8ToString(slug) + '_' +
+        st.fname = 'tradeos_' + UTF8ToString(slug) + '_' +
                    UTF8ToString(date_str) + '.' + ext;
 
         var cleanupMedia = function() {
@@ -308,7 +308,7 @@ EM_JS(int, edclip_js_export_begin, (const char* slug, const char* date_str), {
                 if (mediaStream) mediaStream.getTracks().forEach(function(t) { t.stop(); });
             } catch (_) {}
             try { if (media && media.ctx) media.ctx.close(); } catch (_) {}
-            try { delete window.__EDGEDEPTH_EXPORT_MEDIA__; } catch (_) {}
+            try { delete window.__TRADEOS_EXPORT_MEDIA__; } catch (_) {}
             st.exCam = null; st.exAudioSrc = null; st.exAudioDst = null;
             st.export = 0;
         };
@@ -368,21 +368,21 @@ EM_JS(int, edclip_js_export_begin, (const char* slug, const char* date_str), {
 // While an export capture runs, its own cleanup owns the media - skip.
 EM_JS(void, edclip_js_export_release_media, (), {
     try {
-        var st = Module['__edclip'];
+        var st = Module['__tosclip'];
         if (st && st.rec && st.export) return;   // capture owns it
-        var media = window.__EDGEDEPTH_EXPORT_MEDIA__;
+        var media = window.__TRADEOS_EXPORT_MEDIA__;
         if (!media) return;
         try {
             if (media.stream) media.stream.getTracks().forEach(function(t) { t.stop(); });
         } catch (_) {}
         try { if (media.ctx) media.ctx.close(); } catch (_) {}
-        delete window.__EDGEDEPTH_EXPORT_MEDIA__;
+        delete window.__TRADEOS_EXPORT_MEDIA__;
     } catch (_) {}
 });
 
 // Cam frame geometry: (videoWidth<<16)|videoHeight once decodable, else 0.
 EM_JS(int, edclip_js_cam_dims, (), {
-    var st = Module['__edclip'];
+    var st = Module['__tosclip'];
     var v = st && st.exCam;
     if (!v || v.readyState < 2 || !v.videoWidth || !v.videoHeight) return 0;
     return ((v.videoWidth & 0xffff) << 16) | (v.videoHeight & 0xffff);
@@ -395,7 +395,7 @@ EM_JS(int, edclip_js_cam_dims, (), {
 // codebase re-binds before drawing). Returns 1 on upload.
 EM_JS(int, edclip_js_cam_upload, (int tex), {
     try {
-        var st = Module['__edclip'];
+        var st = Module['__tosclip'];
         var v = st && st.exCam;
         if (!v || v.readyState < 2 || !v.videoWidth) return 0;
         var glTex = GL.textures[tex];
@@ -495,7 +495,7 @@ static void do_start_js(const char* symbol_upper, int64_t replay_data_ms) {
 
     // Watermark line, built once (no per-frame string work).
     snprintf(g_badge, sizeof(g_badge),
-             "EDGEDEPTH \xc2\xb7 %s \xc2\xb7 REPLAY %04d-%02d-%02d",
+             "TRADEOS \xc2\xb7 %s \xc2\xb7 REPLAY %04d-%02d-%02d",
              symbol_upper, tmv.tm_year + 1900, tmv.tm_mon + 1, tmv.tm_mday);
 
     if (edclip_js_start(sym_lower, date_str)) {
@@ -583,7 +583,7 @@ void tick_and_render(bool replay_active) {
 
     ImFont* f_rec   = Theme::Fonts::label();        // "REC" micro-label
     ImFont* f_clock = Theme::Fonts::mono();         // mm:ss numerics
-    ImFont* f_line  = Theme::Fonts::ui_semibold();  // EDGEDEPTH · SYMBOL · DATE
+    ImFont* f_line  = Theme::Fonts::ui_semibold();  // TRADEOS · SYMBOL · DATE
 
     // Measure with each font pushed (repo pattern - ImFont::FontSize is gone in
     // this ImGui; CalcTextSize + the font-less AddText read the pushed font).
@@ -702,7 +702,7 @@ void export_start(const char* slug, const char* symbol_upper, int64_t lesson_sta
              tmv.tm_hour, tmv.tm_min);
 
     snprintf(g_badge, sizeof(g_badge),
-             "EDGEDEPTH \xc2\xb7 %s \xc2\xb7 REPLAY %04d-%02d-%02d",
+             "TRADEOS \xc2\xb7 %s \xc2\xb7 REPLAY %04d-%02d-%02d",
              symbol_upper, tmv.tm_year + 1900, tmv.tm_mon + 1, tmv.tm_mday);
 
     const int r = edclip_js_export_begin(slug_clean, date_str);
@@ -756,7 +756,7 @@ void export_tick_and_render(bool session_alive) {
     ImDrawList* dl = ImGui::GetForegroundDrawList();
     const ImGuiIO& io = ImGui::GetIO();
 
-    // ── Badge - the EDGEDEPTH line only. No REC dot, no elapsed timer: this is
+    // ── Badge - the TRADEOS line only. No REC dot, no elapsed timer: this is
     //    a produced video, not a live share-clip (P3-v1 policy decision).
     ImFont* f_line = Theme::Fonts::ui_semibold();
     ImGui::PushFont(f_line);

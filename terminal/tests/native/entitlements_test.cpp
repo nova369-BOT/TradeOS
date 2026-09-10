@@ -331,11 +331,11 @@ void test_authentication_is_not_the_same_question_as_tier() {
 
 void test_pricing_href_preserves_billing_choice() {
     expect_eq(Entitlements::pricing_href("yearly"),
-              "https://edgedepth.com/pricing?billing=yearly", "annual pricing review");
+              "https://tradeos.com/pricing?billing=yearly", "annual pricing review");
     expect_eq(Entitlements::pricing_href("monthly"),
-              "https://edgedepth.com/pricing?billing=monthly", "monthly pricing review");
+              "https://tradeos.com/pricing?billing=monthly", "monthly pricing review");
     expect_eq(Entitlements::pricing_href("unknown"),
-              "https://edgedepth.com/pricing?billing=yearly", "unknown period defaults yearly");
+              "https://tradeos.com/pricing?billing=yearly", "unknown period defaults yearly");
 }
 
 }  // namespace

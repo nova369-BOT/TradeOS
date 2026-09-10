@@ -14,7 +14,7 @@ body:
     attributes:
       label: Data feed
       options:
-        - EdgeDepth hosted (default)
+        - TradeOS hosted (default)
         - Own feed via ?ws=
         - .edpack replay (no feed)
     validations:
@@ -30,4 +30,4 @@ body:
     id: console
     attributes:
       label: Browser console output
-      description: Open devtools → Console, paste anything red (real errors go to stderr; routine [EdgeDepth] traces are not errors).
+      description: Open devtools → Console, paste anything red (real errors go to stderr; routine [TradeOS] traces are not errors).

@@ -66,8 +66,8 @@ namespace {
     }
 
     // ── Recents / favorites persistence (comma-joined symbol lists in localStorage) ──
-    constexpr const char* LS_RECENTS = "edgedepth.picker.recents";
-    constexpr const char* LS_FAVS    = "edgedepth.picker.favorites";
+    constexpr const char* LS_RECENTS = "tradeos.picker.recents";
+    constexpr const char* LS_FAVS    = "tradeos.picker.favorites";
 
     std::string ls_get(const char* key) {
 #ifdef __EMSCRIPTEN__
@@ -546,7 +546,7 @@ void render_symbol_picker_popup(
                 static_cast<uint32_t>(Terminal::Stream::Scanner)) &&
             ImGui::IsMouseHoveringRect(ImVec2(col_score_r - 60.0f, hdr_y),
                                        ImVec2(col_score_r + 12.0f, hdr_y + hdr_h))) {
-            Theme::tooltip("Scanner scores ride EdgeDepth's hosted feed.\n"
+            Theme::tooltip("Scanner scores ride TradeOS's hosted feed.\n"
                            "This feed has not delivered them.");
         }
         ImGui::PushFont(Fonts::label());
@@ -610,8 +610,8 @@ void render_symbol_picker_popup(
         case SymbolPickerState::SortMode::Score:
             std::sort(visible.begin(), visible.end(), [&, sort_asc](auto* a, auto* b) {
                 double sa = 0, sb = 0;
-                if (auto* s = scanner_mgr.get(a->exchange, a->symbol)) sa = s->edgedepth_score;
-                if (auto* s = scanner_mgr.get(b->exchange, b->symbol)) sb = s->edgedepth_score;
+                if (auto* s = scanner_mgr.get(a->exchange, a->symbol)) sa = s->tradeos_score;
+                if (auto* s = scanner_mgr.get(b->exchange, b->symbol)) sb = s->tradeos_score;
                 return sort_asc ? sa < sb : sa > sb;
             });
             break;
@@ -809,11 +809,11 @@ void render_symbol_picker_popup(
         // SCORE - accent for hot, text ramp below (no traffic lights)
         {
             const auto* scan = scanner_mgr.get(meta->exchange, meta->symbol);
-            if (scan && scan->edgedepth_score > 0.0) {
+            if (scan && scan->tradeos_score > 0.0) {
                 char sbuf[16];
-                snprintf(sbuf, sizeof(sbuf), "%.0f", scan->edgedepth_score);
-                const ImVec4& col = scan->edgedepth_score >= 70.0 ? Tokens::BRAND_TX
-                                  : scan->edgedepth_score >= 40.0 ? Tokens::TX1
+                snprintf(sbuf, sizeof(sbuf), "%.0f", scan->tradeos_score);
+                const ImVec4& col = scan->tradeos_score >= 70.0 ? Tokens::BRAND_TX
+                                  : scan->tradeos_score >= 40.0 ? Tokens::TX1
                                                                   : Tokens::TX3;
                 num_cell(col_score_r, sbuf, col);
             } else num_cell(col_score_r, "-", Tokens::TX4);

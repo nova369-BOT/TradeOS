@@ -1,6 +1,6 @@
 #pragma once
 // ═══════════════════════════════════════════════════════════════════════════════
-// pack_replay_engine.h - Client-side .edpack replay (Hot Replay Path B, slice 2)
+// pack_replay_engine.h - Client-side .tospack replay (Hot Replay Path B, slice 2)
 //
 // Plays a self-contained replay pack served static from R2/CDN with the box
 // fully out of the per-viewer loop: no session POST, no WebSocket, no token

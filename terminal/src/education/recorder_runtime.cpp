@@ -156,14 +156,14 @@ bool RecorderRuntime::load(const std::string& js) {
     // Watermark badge, built once (P1 rule: replay-DATA date, UTC; wall clock
     // never appears anywhere). Symbol uppercased for display.
     {
-        std::string sym_upper = symbol_.empty() ? std::string("EDGEDEPTH") : symbol_;
+        std::string sym_upper = symbol_.empty() ? std::string("TRADEOS") : symbol_;
         std::transform(sym_upper.begin(), sym_upper.end(), sym_upper.begin(),
                        [](unsigned char c) { return std::toupper(c); });
         const time_t s = static_cast<time_t>(shots_.front().from_ms / 1000);
         struct tm tmv;
         gmtime_r(&s, &tmv);
         snprintf(badge_, sizeof(badge_),
-                 "EDGEDEPTH \xc2\xb7 %s \xc2\xb7 REPLAY %04d-%02d-%02d",
+                 "TRADEOS \xc2\xb7 %s \xc2\xb7 REPLAY %04d-%02d-%02d",
                  sym_upper.c_str(),
                  tmv.tm_year + 1900, tmv.tm_mon + 1, tmv.tm_mday);
     }
@@ -187,14 +187,14 @@ void RecorderRuntime::begin_shot(int i, const AppContext& ctx) {
     // Scripts may open with a throwaway settle shot at the pack start, which
     // can sit on a different UTC day than the shots that make the clip.
     {
-        std::string sym_upper = symbol_.empty() ? std::string("EDGEDEPTH") : symbol_;
+        std::string sym_upper = symbol_.empty() ? std::string("TRADEOS") : symbol_;
         std::transform(sym_upper.begin(), sym_upper.end(), sym_upper.begin(),
                        [](unsigned char c) { return std::toupper(c); });
         const time_t sh = static_cast<time_t>(s.from_ms / 1000);
         struct tm tmv;
         gmtime_r(&sh, &tmv);
         snprintf(badge_, sizeof(badge_),
-                 "EDGEDEPTH \xc2\xb7 %s \xc2\xb7 REPLAY %04d-%02d-%02d",
+                 "TRADEOS \xc2\xb7 %s \xc2\xb7 REPLAY %04d-%02d-%02d",
                  sym_upper.c_str(),
                  tmv.tm_year + 1900, tmv.tm_mon + 1, tmv.tm_mday);
     }
@@ -401,7 +401,7 @@ void RecorderRuntime::emit_state(const AppContext& ctx) {
         if (!panels.empty()) st["panels"] = panels;
     }
 
-    transport::dispatch_state("edgedepth:recorder", "__EDGEDEPTH_RECORDER_STATE__",
+    transport::dispatch_state("tradeos:recorder", "__TRADEOS_RECORDER_STATE__",
                               st.dump());
 #else
     (void)ctx;
@@ -465,7 +465,7 @@ void RecorderRuntime::render_overlay(const AppContext& ctx) {
         dl->AddRectFilled(ImVec2(v0.x, by1), v1, dim);
         dl->AddRectFilled(ImVec2(v0.x, by0), ImVec2(bx0, by1), dim);
         dl->AddRectFilled(ImVec2(bx1, by0), ImVec2(v1.x, by1), dim);
-        // Brand-accent ring (#35c9c4 - the one accent, tokens.css).
+        // Brand-accent ring (gold #C9A227 default; #35c9c4 when accent is teal).
         dl->AddRect(ImVec2(bx0, by0), ImVec2(bx1, by1),
                     IM_COL32(53, 201, 196,
                              static_cast<int>(235.0f * lightbox_alpha_)),
@@ -473,7 +473,7 @@ void RecorderRuntime::render_overlay(const AppContext& ctx) {
     }
 
     // ── Badge - export style (recorder_glue.cpp export_tick_and_render): the
-    //    EDGEDEPTH line only, no REC dot, no timer. This is a produced video.
+    //    TRADEOS line only, no REC dot, no timer. This is a produced video.
 
     ImFont* f_line = Theme::Fonts::ui_semibold();
     ImGui::PushFont(f_line);

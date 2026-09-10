@@ -22,7 +22,7 @@ A host page can instead set this before loading the WebAssembly glue:
 
 ```html
 <script>
-  window.__EDGEDEPTH_REPLAY_LIBRARY_URL__ = "https://data.example.com/manifest.json";
+  window.__TRADEOS_REPLAY_LIBRARY_URL__ = "https://data.example.com/manifest.json";
 </script>
 ```
 

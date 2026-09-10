@@ -1,6 +1,6 @@
 # Third-party notices
 
-The EdgeDepth Terminal build fetches and links the following third-party components (all pinned in `CMakeLists.txt` via FetchContent):
+The TradeOS Terminal build fetches and links the following third-party components (all pinned in `CMakeLists.txt` via FetchContent):
 
 | Component | Version / pin | License |
 |---|---|---|
@@ -22,4 +22,4 @@ The EdgeDepth Terminal build fetches and links the following third-party compone
 
 ## Symbol icons
 
-Coin/exchange icons rendered in the watchlist are fetched from EdgeDepth's CDN at runtime and are not part of this repository. They derive from [VadimMalykhin/binance-icons](https://github.com/VadimMalykhin/binance-icons) (MIT) plus exchange brand kits. Exchange names and logos are trademarks of their respective owners.
+Coin/exchange icons rendered in the watchlist are fetched from TradeOS's CDN at runtime and are not part of this repository. They derive from [VadimMalykhin/binance-icons](https://github.com/VadimMalykhin/binance-icons) (MIT) plus exchange brand kits. Exchange names and logos are trademarks of their respective owners.

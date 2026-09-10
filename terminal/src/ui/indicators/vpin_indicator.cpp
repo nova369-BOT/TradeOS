@@ -131,7 +131,7 @@ void VPINIndicator::render_content(double x_min, double x_max) {
         // forever (see stream_presence.h).
         if (StreamPresence::instance().absent(
                 static_cast<uint32_t>(Terminal::Stream::VPINState))) {
-            const char* msg = "VPIN reads from EdgeDepth's hosted analytics. "
+            const char* msg = "VPIN reads from TradeOS's hosted analytics. "
                               "This feed has not delivered it.";
             ImGui::PushFont(Theme::Fonts::label());
             const ImVec2 ts = ImGui::CalcTextSize(msg);

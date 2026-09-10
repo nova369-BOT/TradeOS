@@ -27,7 +27,7 @@ Thanks for your interest. A few ground rules keep this maintainable by a very sm
 
 - Large refactors of working systems ("modernization" PRs)
 - New dependencies. The dependency set is deliberately small and pinned
-- Features that require EdgeDepth's closed backend to test
+- Features that require TradeOS's closed backend to test
 
 ## Native tests
 

@@ -41,10 +41,10 @@ RUN cd build && test -f index.html && test -f index.js \
 
 # Load the runtime config before the Emscripten glue. Injecting straight
 # after <head> guarantees it runs before any script the shell emits, so
-# window.__EDGEDEPTH_WS_URL__ is set by the time main() reads it.
+# window.__TRADEOS_WS_URL__ is set by the time main() reads it.
 RUN cd build \
- && sed -i 's|<head>|<head>\n<script src="edgedepth-config.js"></script>|' index.html \
- && grep -q 'edgedepth-config.js' index.html
+ && sed -i 's|<head>|<head>\n<script src="tradeos-config.js"></script>|' index.html \
+ && grep -q 'tradeos-config.js' index.html
 
 # ── serve ───────────────────────────────────────────────────────────────────
 FROM nginx:1.27-alpine

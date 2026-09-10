@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- TradeOS emblem — open power-ring (charcoal) with gap at top,
+     one gold candlestick rising through the gap, two charcoal depth bars behind. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <style>
+      .ring     { fill: none; stroke: #14181D; stroke-width: 38; stroke-linecap: round; }
+      .depth    { fill: #14181D; }
+      .candle   { fill: #C9A227; }
+      .wick     { stroke: #C9A227; stroke-width: 10; stroke-linecap: round; }
+    </style>
+  </defs>
+
+  <!-- Depth bars behind the candle body -->
+  <rect class="depth" x="146" y="288" width="220" height="22" rx="6"/>
+  <rect class="depth" x="170" y="326" width="172" height="22" rx="6"/>
+
+  <!-- Candlestick wick (extends up through the ring gap) -->
+  <line class="wick" x1="256" y1="118" x2="256" y2="372"/>
+
+  <!-- Candlestick body -->
+  <rect class="candle" x="222" y="232" width="68" height="108" rx="10"/>
+
+  <!-- Power ring — 300-degree arc with a gap at the top for the wick -->
+  <!-- Start at ~210deg (lower-left) and sweep 300deg clockwise to ~150deg (lower-right) -->
+  <path class="ring"
+        d="M 121,362 A 180,180 0 1,1 391,362"/>
+</svg>

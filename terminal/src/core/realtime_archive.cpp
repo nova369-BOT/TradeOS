@@ -192,7 +192,7 @@ void RealtimeArchive::request_startup(StreamManager& stream) {
     // Give trade delivery a moment to establish stable exchange identities.
     if(seen_ids_.empty() && emscripten_get_now()-startup_at_<2000)return;
     startup_requested_=true;
-    const char* token=emscripten_run_script_string("window.__EDGEDEPTH_REPLAY_TOKEN__ || ''");
+    const char* token=emscripten_run_script_string("window.__TRADEOS_REPLAY_TOKEN__ || ''");
     if(!token || !*token) {startup_status="Recording live; recent history unavailable on this feed";seen_ids_.clear();return;}
     startup_at_=emscripten_get_now();startup_pending_=true;startup_end=first_depth_ms_;
     startup_status="Loading recent history; live feed running";

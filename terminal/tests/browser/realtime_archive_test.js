@@ -9,9 +9,9 @@ document.querySelector('#run').onclick=async()=>{
     try {
         const source=await (await fetch(new URLSearchParams(location.search).get('source') || '../../src/realtime_archive.js')).text();
         const fn=source.slice(source.indexOf('function archiveWorker()'),source.indexOf('const states=new Map();'));
-        const name='edgedepth-rt-test-'+Date.now();
+        const name='tradeos-rt-test-'+Date.now();
         function make(extra='',budget=256*1024*1024) {
-            const code=fn.replace('edgedepth-rt-observed-v1',name).replace('256 * 1024 * 1024',String(budget));
+            const code=fn.replace('tradeos-rt-observed-v1',name).replace('256 * 1024 * 1024',String(budget));
             return new Worker(URL.createObjectURL(new Blob([extra+'\n('+code+')()'],{type:'text/javascript'})));
         }
         worker=make();

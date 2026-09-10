@@ -492,7 +492,7 @@ void StatsWidget::feed_note() {
     // PushTextWrapPos is window-local, not screen-space.
     ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + ww - PADX * 2.0f);
     ImGui::TextUnformatted(
-        "The analytics rows read from EdgeDepth's hosted feed. "
+        "The analytics rows read from TradeOS's hosted feed. "
         "This feed has not delivered those streams, so they stay empty. "
         "Price, book, tape and liquidations are live.");
     ImGui::PopTextWrapPos();

@@ -6,12 +6,12 @@
 // SAME embedded WASM terminal as the lesson/studio player, driven by a React chrome
 // (EventReplayShell) that OWNS the shell + transport. Unlike the lesson there is no
 // doc + no gate loop, and unlike studio no source picker - the event id + symbol +
-// window arrive via window.__EDGEDEPTH_EVENT__ (read by EducationBoot), and the
+// window arrive via window.__TRADEOS_EVENT__ (read by EducationBoot), and the
 // archive replay is auto-started by main.cpp maybe_start_event_replay().
 //
 // This runtime is the event analogue of StudioRuntime: a transport MIRROR. It
 //   (1) EMITS the archive session's transport state (clock/progress/paused/speed/
-//       window/loading) to the React chrome via CustomEvent('edgedepth:event'), and
+//       window/loading) to the React chrome via CustomEvent('tradeos:event'), and
 //   (2) DRAINS the React transport commands (pause/play/speed/seek/skip) onto the
 //       shared ReplayManager.
 // No steps live here - the key_moments rail is built entirely on the web from the
@@ -38,7 +38,7 @@ public:
     void update(const AppContext& ctx);
 
     // Per-frame, after update(). Pushes transport state to the React chrome via a
-    // CustomEvent('edgedepth:event'). Dirty-checked on the DISCRETE fields (clock/
+    // CustomEvent('tradeos:event'). Dirty-checked on the DISCRETE fields (clock/
     // progress excluded) so it emits on transitions + a clock cadence, not every
     // frame - React interpolates the clock between emits, like the lesson player.
     void emit_state(const AppContext& ctx);

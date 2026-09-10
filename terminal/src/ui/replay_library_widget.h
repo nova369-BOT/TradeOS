@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-// Public, manifest-driven .edpack catalog. Packs are static objects and replay
+// Public, manifest-driven .tospack catalog. Packs are static objects and replay
 // entirely through PackReplayEngine, so this widget needs no account, backend
 // replay session, or additional data path.
 class ReplayLibraryWidget final : public Widget {

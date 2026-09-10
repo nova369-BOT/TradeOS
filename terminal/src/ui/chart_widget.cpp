@@ -480,7 +480,7 @@ void ChartWidget::update() {
                         try {
                             var msg = UTF8ToString($0);
                             if (window.Notification && Notification.permission === 'granted')
-                                new Notification('EdgeDepth alert', { body: msg });
+                                new Notification('TradeOS alert', { body: msg });
                             var AC = window.AudioContext || window.webkitAudioContext;
                             if (AC) { var c = new AC(); var o = c.createOscillator();
                                 var g = c.createGain(); o.frequency.value = 880;

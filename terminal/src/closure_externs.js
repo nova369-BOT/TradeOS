@@ -1,5 +1,5 @@
 /**
- * Closure Compiler externs for the EdgeDepth WASM client (Release build).
+ * Closure Compiler externs for the TradeOS WASM client (Release build).
  *
  * --compilation_level ADVANCED_OPTIMIZATIONS renames every property/global it
  * doesn't recognise. Anything our hand-written JS (shell.html,

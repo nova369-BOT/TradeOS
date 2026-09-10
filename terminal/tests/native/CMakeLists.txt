@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(edgedepth_terminal_native_tests LANGUAGES CXX)
+project(tradeos_terminal_native_tests LANGUAGES CXX)
 
 enable_testing()
 

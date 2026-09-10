@@ -403,7 +403,7 @@ static void on_ws_status(const std::string& status) {
 
 // Backend endpoint resolution, first match wins:
 //   1. ?ws=<url> query param        (dev / self-hosters pointing at a local gateway)
-//   2. window.__EDGEDEPTH_WS_URL__  (host page, set before the glue loads)
+//   2. window.__TRADEOS_WS_URL__  (host page, set before the glue loads)
 //   3. wss://api.edgedepth.com/ws   (production default)
 // Only ws:// and wss:// schemes are accepted; anything else falls through.
 static std::string resolve_ws_url() {
@@ -412,7 +412,7 @@ static std::string resolve_ws_url() {
     char* raw = reinterpret_cast<char*>(EM_ASM_PTR({
         try {
             var url = new URLSearchParams(window.location.search).get('ws') ||
-                      window.__EDGEDEPTH_WS_URL__ || "";
+                      window.__TRADEOS_WS_URL__ || "";
             url = String(url);
             if (url.indexOf('ws://') !== 0 && url.indexOf('wss://') !== 0) return 0;
             var len = lengthBytesUTF8(url);
@@ -448,7 +448,7 @@ void connect_websocket() {
 
 // Replay-lane endpoint resolution, first match wins:
 //   1. ?replay_ws=<url> query param   (dev / pointing at a local replay-server)
-//   2. window.__EDGEDEPTH_REPLAY_WS_URL__  (host page, before the glue loads)
+//   2. window.__TRADEOS_REPLAY_WS_URL__  (host page, before the glue loads)
 //   3. "" = no separate replay origin, so the replay lane rides the live socket
 //
 // Returning "" by default is the whole safety property: shipping this build
@@ -464,7 +464,7 @@ static std::string resolve_replay_ws_url() {
     char* raw = reinterpret_cast<char*>(EM_ASM_PTR({
         try {
             var url = new URLSearchParams(window.location.search).get('replay_ws') ||
-                      window.__EDGEDEPTH_REPLAY_WS_URL__ || "";
+                      window.__TRADEOS_REPLAY_WS_URL__ || "";
             url = String(url);
             if (url.indexOf('ws://') !== 0 && url.indexOf('wss://') !== 0) return 0;
             var len = lengthBytesUTF8(url);
@@ -601,7 +601,7 @@ void check_initialization() {
 
     const Terminal::Pair pair{g_initial_route.exchange, g_initial_route.symbol};
 
-    // Pack mode boots with NO WebSocket (the .edpack + metadata fetch are the
+    // Pack mode boots with NO WebSocket (the .tospack + metadata fetch are the
     // only network I/O - the box stays out of the per-viewer loop), so init
     // proceeds on the pack path without a socket.
     const bool comms_ready =
@@ -840,7 +840,7 @@ void maybe_start_event_replay() {
     started = true;
 }
 
-// Pack (CDN .edpack) replay: start exactly once, as soon as the terminal is
+// Pack (CDN .tospack) replay: start exactly once, as soon as the terminal is
 // initialized. Mirrors maybe_start_event_replay but there is no session POST
 // and no WebSocket - ReplayManager::request_pack_replay boots the
 // PackReplayEngine, which fetches the pack header and drives the same replay
@@ -910,7 +910,7 @@ void maybe_emit_session_start() {
     g_usage_session_last_hb_ms = usage_now_ms();
 
     const std::string sym = usage_session_symbol();
-    std::string plan = usage::read_window_string("__EDGEDEPTH_TIER__");
+    std::string plan = usage::read_window_string("__TRADEOS_TIER__");
     if (plan.empty()) plan = "free";
     const std::string ref = usage::read_referrer();
 
@@ -962,7 +962,7 @@ void tick_session_usage(double dt_seconds, bool document_visible) {
 }
 
 // STANDALONE pack start-at (?packt=<epoch-ms>): the embedded chrome applies
-// __EDGEDEPTH_PACK__.seekToMs via EventRuntime's one-shot deep-link seek, but
+// __TRADEOS_PACK__.seekToMs via EventRuntime's one-shot deep-link seek, but
 // EventRuntime never runs standalone. Mirror the exact same contract here:
 // ONE deliberate ReplayManager::seek once the session is live and primed
 // (Playing or Paused - joined AND past the buffering gate) so the chart's
@@ -1525,7 +1525,7 @@ void main_loop() {
         } else {
             // Draw/capture overlay (phase 1): armed from the React inspector, the
             // author drags a region/band on the chart and the inverse-projected
-            // bounds are emitted back as 'edgedepth:capture'. Never during an
+            // bounds are emitted back as 'tradeos:capture'. Never during an
             // export take (it would burn into the video + steal the mouse).
             edu::StudioRuntime::instance().render_capture_overlay(g_app.app_ctx);
         }
@@ -1542,7 +1542,7 @@ void main_loop() {
         // Event = embedded archive replay; embedded Pack (/demo) reuses the SAME
         // chrome against the pack engine. The React EventReplayShell owns the chrome
         // + transport; EventRuntime mirrors the replay transport state to it
-        // (edgedepth:event) and drains its seek/pause/speed commands - all through
+        // (tradeos:event) and drains its seek/pause/speed commands - all through
         // ReplayManager, which routes to the box session (event) or the pack engine
         // (pack) identically. No gate loop, no spotlight - the key_moments rail is
         // built on the web (EventRecord / showcase catalog).
@@ -1556,8 +1556,8 @@ void main_loop() {
     // Recorder driver (CLIP_FACTORY P2) - ORTHOGONAL to the session mode: layered
     // over whichever event/pack replay booted above, it walks the injected
     // RecorderScript's shots[] against ReplayManager (skip/seek/speed/tf/hold),
-    // emits progress to the render harness (CustomEvent 'edgedepth:recorder'),
-    // and burns the EDGEDEPTH badge. No-op unless a script global was injected.
+    // emits progress to the render harness (CustomEvent 'tradeos:recorder'),
+    // and burns the TRADEOS badge. No-op unless a script global was injected.
     if (edu::RecorderRuntime::instance().active()) {
         edu::RecorderRuntime::instance().update(g_app.app_ctx);
         edu::RecorderRuntime::instance().emit_state(g_app.app_ctx);
@@ -1584,7 +1584,7 @@ void main_loop() {
         return;
     }
     glViewport(0, 0, display_w, display_h);
-    glClearColor(0.1f, 0.1f, 0.12f, 1.0f);
+    glClearColor(0.055f, 0.067f, 0.086f, 1.0f);  // #0E1116 - TradeOS base
     glClear(GL_COLOR_BUFFER_BIT);
     g_profiler.begin("GL Draw");
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -1676,7 +1676,7 @@ int main(int, char**) {
     window_height = EM_ASM_INT({ return window.innerHeight || 1080; });
 #endif
     g_app.window = SDL_CreateWindow(
-        "EdgeDepth Terminal",
+        "TradeOS Terminal",
         // SDL_WINDOWPOS_CENTERED,
         // SDL_WINDOWPOS_CENTERED,
         window_width, window_height,
@@ -1697,11 +1697,11 @@ int main(int, char**) {
     g_app.msg_handler = std::make_unique<MessageHandler>();
     g_app.heatmap_mgr = std::make_unique<HeatmapManager>();
     g_app.liq_heatmap_mgr = std::make_unique<LiquidationHeatmapManager>();
-    // Detect embedded education mode (window.__EDGEDEPTH_LESSON__) BEFORE any
+    // Detect embedded education mode (window.__TRADEOS_LESSON__) BEFORE any
     // URL writes - when hosted inside the Next app, Next owns the URL and the
     // client must not pushState over it (see EducationBoot).
     EducationBoot::instance().detect();
-    // Read the signed-in user's plan (window.__EDGEDEPTH_TIER__) once, for replay
+    // Read the signed-in user's plan (window.__TRADEOS_TIER__) once, for replay
     // gating UX. Backend still enforces the real cap. Defaults to Pro if unset.
     Entitlements::detect();
     // Display-only IANA preference. Browser Intl remains the authority for
@@ -1754,7 +1754,7 @@ int main(int, char**) {
 
     // Lesson mode: fetch the LessonDoc (credentialed → paywalled) so the replay
     // runtime can consume it. Lesson-only - studio has no doc (picker-driven) and
-    // event has no doc (the archive id + window ride __EDGEDEPTH_EVENT__), and
+    // event has no doc (the archive id + window ride __TRADEOS_EVENT__), and
     // is_embedded() now covers both, so gate on is_lesson() specifically.
     if (EducationBoot::instance().is_lesson()) {
         EducationBoot::instance().fetch_lesson([]() {
