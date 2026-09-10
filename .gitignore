@@ -1,0 +1,43 @@
+# Build artifacts
+terminal/build
+terminal/build-*
+terminal/build-wsl
+terminal/build-windows
+terminal/build-native-tests
+terminal/cmake-build-*
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# Emscripten / emsdk
+.emsdk/
+.emsdk_cache/
+upstream/
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Docker / runtime
+.docker-data/
+
+# Local replay packs (can be huge)
+*.edpack
+!terminal/replay-library/**
+
+# Env files
+.env
+.env.local
