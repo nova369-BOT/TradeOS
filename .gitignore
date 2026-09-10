@@ -36,6 +36,7 @@ npm-debug.log*
 
 # Local replay packs (can be huge)
 *.edpack
+*.tospack
 !terminal/replay-library/**
 
 # Env files
